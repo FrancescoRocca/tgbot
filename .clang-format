@@ -1,0 +1,8 @@
+UseTab: Always
+IndentWidth: 4
+TabWidth: 4
+ColumnLimit: 0
+AllowAllParametersOfDeclarationOnNextLine: false
+BreakBeforeBinaryOperators: None
+SpacesInParentheses: false
+BinPackParameters: true
