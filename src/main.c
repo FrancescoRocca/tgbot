@@ -85,7 +85,7 @@ int main(void) {
 
 	tgbot_rc ret;
 	char token[256];
-	
+
 	FILE *fp = fopen(".token", "r");
 	if (fp == NULL) {
 		fprintf(stderr, "No .token file found!\n");

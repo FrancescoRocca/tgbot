@@ -1,26 +1,24 @@
 # tgbot
-A minimal C Telegram API Framework 🚀
+A minimal C Telegram API Framework
 
-## 📋 Requirements
+## Requirements
 - libcurl
 - json-c
 
-## 🎯 Goal
-This project is not designed to cover the entire Telegram Bot API. Instead, it focuses on a subset of the API for simplicity.
+> Note: This project is purely educational. It does not aim to cover the entire Telegram Bot API, but only a selected subset of methods.
 
-### Currently Supported Features
-#### 📑 Types
+### Supported Features
+#### Types
 - **InlineKeyboardMarkup**
   - Note: Standard `KeyboardMarkup` is intentionally not supported.
 
-#### ⚙️ Methods
+#### Methods
 - `getMe`
 - `sendMessage`
 - `editMessageText`
 
-## 🛠️ Roadmap
-Future planned methods to expand functionality:
-- 📸 `sendPhoto`
-- 🎵 `sendAudio`
-- 📂 `sendDocument`
-- 🎥 `sendVideo`
+## Roadmap
+- `sendPhoto`
+- `sendAudio`
+- `sendDocument`
+- `sendVideo`
