@@ -33,7 +33,6 @@ struct tgbot_me_t {
 };
 typedef struct tgbot_me_t tgbot_me;
 
-/* TODO: implement variable length string */
 /**
  * A structure to represent Update object
  */

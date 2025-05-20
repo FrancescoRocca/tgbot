@@ -5,7 +5,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "json_object.h"
 #include "tgbot.h"
 
 tgbot_rc tgbot_init(tgbot *bot, char *token) {

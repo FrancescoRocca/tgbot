@@ -1,11 +1,18 @@
 #include <signal.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-#include "main.h"
-#include "tgbot.h"
+#include <tgbot.h>
 
+#define WELCOME_MSG "Hi there! This bot is coded in C."
+
+void parse_command(tgbot *bot, tgbot_update *update);
+void sighandler(int signum);
+void callback_parser(tgbot *bot, tgbot_cbquery *query);
+
+bool run = true;
 tgbot bot;
 size_t rows = 1, columns = 2;
 tgbot_inlinekeyboardmarkup **keyboard;
@@ -33,11 +40,8 @@ void callback_handler(tgbot *bot, tgbot_cbquery *query) {
 }
 
 void sighandler(int signum) {
-	fprintf(stdout, "Cleaning resources...\n");
-	tgbot_destroy(&bot);
-	tgbot_deallocate_inlinekeyboardmarkup(keyboard, rows);
-
-	exit(0);
+	fprintf(stdout, "Closing...\n");
+	run = false;
 }
 
 void parse_command(tgbot *bot, tgbot_update *update) {
@@ -108,7 +112,7 @@ int main(void) {
 	tgbot_update update;
 
 	/* Main loop */
-	for (;;) {
+	while (run) {
 		ret = tgbot_get_update(&bot, &update, callback_handler);
 		if (ret != TGBOT_OK) {
 			fprintf(stderr, "tgbot_get_updates()\n");
@@ -119,4 +123,9 @@ int main(void) {
 			parse_command(&bot, &update);
 		}
 	}
+
+	tgbot_destroy(&bot);
+	tgbot_deallocate_inlinekeyboardmarkup(keyboard, rows);
+
+	return 0;
 }
