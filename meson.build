@@ -10,6 +10,8 @@ json_c_dep = dependency('json-c')
 
 deps = [curl_dep, json_c_dep]
 
+add_project_arguments('-O2', language: 'c')
+
 install_headers('include/tgbot.h')
 #install_subdir('.', install_dir: 'C:/tgbot')
 lib = library(

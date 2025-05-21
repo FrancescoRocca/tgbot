@@ -3,7 +3,6 @@
 #include <stdio.h>
 #include <tgbot.h>
 
-
 bool run = true;
 
 void sighandler(int signum) {
@@ -19,7 +18,6 @@ void echo_message(tgbot *bot, tgbot_update *update) {
 }
 
 int main(void) {
-	printf("Running...\n");
 	/* Retrieve bot's token */
 	FILE *fp = fopen(".token", "r");
 	if (fp == NULL) {
