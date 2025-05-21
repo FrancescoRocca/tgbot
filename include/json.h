@@ -4,6 +4,6 @@
 #include "types.h"
 #include <json-c/json.h>
 
-json_object *tgbot_new_inlinekeyboardmarkup(tgbot_inlinekeyboardmarkup **keyboard, size_t rows, size_t columns);
+json_object *tgbot_new_inlinekeyboardmarkup(tgbot_inlinekeyboard *keyboard);
 
 #endif

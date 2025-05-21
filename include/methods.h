@@ -14,9 +14,9 @@ tgbot_rc tgbot_request(tgbot *bot, char *url, struct memory_buffer **mb, json_ob
 
 /* Methods */
 tgbot_rc tgbot_get_me(tgbot *bot, tgbot_me *me);
-tgbot_rc tgbot_send_message(tgbot *bot, int64_t chat_id, char *text, char *parse_mode, tgbot_inlinekeyboardmarkup **reply_markup, size_t rows, size_t columns);
+tgbot_rc tgbot_send_message(tgbot *bot, int64_t chat_id, char *text, char *parse_mode, tgbot_inlinekeyboard *reply_markup);
 
 /* Updating Methods */
-tgbot_rc tgbot_edit_message_text(tgbot *bot, int64_t chat_id, long message_id, char *text, tgbot_inlinekeyboardmarkup **keyboard, size_t rows, size_t columns);
+tgbot_rc tgbot_edit_message_text(tgbot *bot, int64_t chat_id, long message_id, char *text, tgbot_inlinekeyboard *keyboard);
 
 #endif

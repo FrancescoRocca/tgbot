@@ -1,8 +1,8 @@
 #include <curl/curl.h>
+#include <string.h>
 
 #include "json.h"
 #include "methods.h"
-
 
 tgbot_rc tgbot_get_update(tgbot *bot, tgbot_update *update, Callback cbq_handler) {
 	char url[1024];
@@ -52,7 +52,7 @@ tgbot_rc tgbot_get_update(tgbot *bot, tgbot_update *update, Callback cbq_handler
 	json_object *message = json_object_object_get(result, "message");
 	if (message) {
 		tgbot_parse_message(bot, update, result);
-	} else {
+	} else if (cbq_handler != NULL) {
 		tgbot_cbquery query;
 		tgbot_parse_cbquery(bot, &query, result, cbq_handler);
 	}
@@ -212,7 +212,7 @@ tgbot_rc tgbot_get_me(tgbot *bot, tgbot_me *me) {
 	return TGBOT_OK;
 }
 
-tgbot_rc tgbot_send_message(tgbot *bot, int64_t chat_id, char *text, char *parse_mode, tgbot_inlinekeyboardmarkup **keyboard, size_t rows, size_t columns) {
+tgbot_rc tgbot_send_message(tgbot *bot, int64_t chat_id, char *text, char *parse_mode, tgbot_inlinekeyboard *keyboard) {
 	char url[1024];
 
 	json_object *rjson = json_object_new_object();
@@ -221,7 +221,7 @@ tgbot_rc tgbot_send_message(tgbot *bot, int64_t chat_id, char *text, char *parse
 	json_object_object_add(rjson, "parse_mode", json_object_new_string(parse_mode));
 
 	if (keyboard != NULL) {
-		json_object *reply_markup = tgbot_new_inlinekeyboardmarkup(keyboard, rows, columns);
+		json_object *reply_markup = tgbot_new_inlinekeyboardmarkup(keyboard);
 		json_object_object_add(rjson, "reply_markup", reply_markup);
 	}
 
@@ -243,7 +243,7 @@ tgbot_rc tgbot_send_message(tgbot *bot, int64_t chat_id, char *text, char *parse
 	return TGBOT_OK;
 }
 
-tgbot_rc tgbot_edit_message_text(tgbot *bot, int64_t chat_id, long message_id, char *text, tgbot_inlinekeyboardmarkup **keyboard, size_t rows, size_t columns) {
+tgbot_rc tgbot_edit_message_text(tgbot *bot, int64_t chat_id, long message_id, char *text, tgbot_inlinekeyboard *keyboard) {
 	char url[1024];
 
 	json_object *rjson = json_object_new_object();
@@ -254,7 +254,7 @@ tgbot_rc tgbot_edit_message_text(tgbot *bot, int64_t chat_id, long message_id, c
 	snprintf(url, sizeof(url), "%seditMessageText", bot->api);
 
 	if (keyboard != NULL) {
-		json_object *reply_markup = tgbot_new_inlinekeyboardmarkup(keyboard, rows, columns);
+		json_object *reply_markup = tgbot_new_inlinekeyboardmarkup(keyboard);
 		json_object_object_add(rjson, "reply_markup", reply_markup);
 	}
 

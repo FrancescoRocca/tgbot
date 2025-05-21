@@ -4,7 +4,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include <tgbot.h>
+#include "tgbot.h"
+#include "types.h"
 
 #define WELCOME_MSG "Hi there! This bot is coded in C."
 
@@ -14,26 +15,21 @@ void callback_parser(tgbot *bot, tgbot_cbquery *query);
 
 bool run = true;
 tgbot bot;
-size_t rows = 1, columns = 2;
-tgbot_inlinekeyboardmarkup **keyboard;
+tgbot_inlinekeyboard *keyboard;
 
 /* Callback handler function */
 void callback_handler(tgbot *bot, tgbot_cbquery *query) {
 	if (strcmp("test-callback", query->data) == 0) {
 		/* Handle `test-callback` */
-
-		tgbot_inlinekeyboardmarkup **home_keyboard;
-		tgbot_allocate_inlinekeyboardmarkup(&home_keyboard, 1, 1);
-		strncpy(home_keyboard[0][0].text, "Home", sizeof(home_keyboard[0][0].text));
-		strncpy(home_keyboard[0][0].url, "", sizeof(home_keyboard[0][0].url));
-		strncpy(home_keyboard[0][0].callback_data, "home", sizeof(home_keyboard[0][0].callback_data));
-
-		tgbot_edit_message_text(bot, query->chat_id, query->message_id, "Callback called!", home_keyboard, 1, 1);
-		tgbot_deallocate_inlinekeyboardmarkup(home_keyboard, 1);
+		tgbot_inlinekeyboard *home_keyboard = tgbot_new_inlinekeyboard(1, 1);
+		/* Add buttons */
+		tgbot_inlinekeyboard_button(home_keyboard, 0, 0, "Home", "", "home");
+		tgbot_edit_message_text(bot, query->chat_id, query->message_id, "Callback called!", home_keyboard);
+		tgbot_destroy_inlinekeyboard(home_keyboard);
 
 		return;
 	} else if (strcmp("home", query->data) == 0) {
-		tgbot_edit_message_text(bot, query->chat_id, query->message_id, WELCOME_MSG, keyboard, rows, columns);
+		tgbot_edit_message_text(bot, query->chat_id, query->message_id, WELCOME_MSG, keyboard);
 
 		return;
 	}
@@ -48,26 +44,7 @@ void parse_command(tgbot *bot, tgbot_update *update) {
 	tgbot_rc ret;
 
 	if (strcmp("/start", update->text) == 0) {
-		/* Example of an InlineKeyboardMarkup */
-		/* Check global variables */
-		tgbot_allocate_inlinekeyboardmarkup(&keyboard, rows, columns);
-
-		/* Populate the InlineKeyboardMarkup */
-		strncpy(keyboard[0][0].text, "Google", sizeof(keyboard[1][0].text));
-		strncpy(keyboard[0][0].url, "https://google.com", sizeof(keyboard[1][0].url));
-		strncpy(keyboard[0][0].callback_data, "", sizeof(keyboard[1][0].callback_data));
-
-		strncpy(keyboard[0][1].text, "Callback", sizeof(keyboard[0][1].text));
-		strncpy(keyboard[0][1].url, "", sizeof(keyboard[0][1].url));
-		strncpy(keyboard[0][1].callback_data, "test-callback", sizeof(keyboard[0][1].callback_data));
-
-		/* If you want 3 buttons on 2 rows, for example on the first row 2 buttons and on the second only one */
-		/* you have to put rows = 2, columns = 2 and pass an empty string to .text field */
-
-		ret = tgbot_send_message(bot, update->chat_id, WELCOME_MSG, "Markdown", keyboard, rows, columns);
-
-		/* Deallocate the keyboard */
-		/* See sighandler() */
+		ret = tgbot_send_message(bot, update->chat_id, WELCOME_MSG, "Markdown", keyboard);
 
 		if (ret != TGBOT_OK) {
 			fprintf(stderr, "Failed to send message\n");
@@ -77,7 +54,7 @@ void parse_command(tgbot *bot, tgbot_update *update) {
 	}
 
 	/* Echo the message */
-	ret = tgbot_send_message(bot, update->chat_id, update->text, "Markdown", NULL, 0, 0);
+	ret = tgbot_send_message(bot, update->chat_id, update->text, "Markdown", NULL);
 	if (ret != TGBOT_OK) {
 		fprintf(stderr, "Failed to send message\n");
 	}
@@ -110,6 +87,18 @@ int main(void) {
 	fprintf(stdout, "Running Telegram bot...\nPress Ctrl-C to close.\n");
 
 	tgbot_update update;
+	/* Allocate the new inline keyboard (remember to free!) */
+	keyboard = tgbot_new_inlinekeyboard(1, 2);
+	if (keyboard == NULL) {
+		tgbot_destroy(&bot);
+		return 1;
+	}
+
+	/* Populate the InlineKeyboardMarkup */
+	tgbot_inlinekeyboard_button(keyboard, 0, 0, "Google", "https://google.com", "");
+	tgbot_inlinekeyboard_button(keyboard, 0, 1, "Callback", "", "test-callback");
+	/* If you want 3 buttons on 2 rows, for example on the first row 2 buttons and on the second only one */
+	/* you have to put rows = 2, columns = 2 and pass an empty string to .text field */
 
 	/* Main loop */
 	while (run) {
@@ -124,8 +113,8 @@ int main(void) {
 		}
 	}
 
+	tgbot_destroy_inlinekeyboard(keyboard);
 	tgbot_destroy(&bot);
-	tgbot_deallocate_inlinekeyboardmarkup(keyboard, rows);
 
 	return 0;
 }

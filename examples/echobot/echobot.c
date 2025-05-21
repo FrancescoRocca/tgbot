@@ -9,12 +9,8 @@ void sighandler(int signum) {
 	run = false;
 }
 
-void callback(tgbot *bot, tgbot_cbquery *query) {
-	fprintf(stdout, "Callback called!");
-}
-
 void echo_message(tgbot *bot, tgbot_update *update) {
-	tgbot_send_message(bot, update->chat_id, update->text, "MARKDOWN", NULL, 0, 0);
+	tgbot_send_message(bot, update->chat_id, update->text, "MARKDOWN", NULL);
 }
 
 int main(void) {
@@ -38,7 +34,7 @@ int main(void) {
 	tgbot_update update;
 
 	while (run) {
-		tgbot_get_update(&bot, &update, callback);
+		tgbot_get_update(&bot, &update, NULL);
 		echo_message(&bot, &update);
 	}
 

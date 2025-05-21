@@ -10,8 +10,6 @@ json_c_dep = dependency('json-c')
 
 deps = [curl_dep, json_c_dep]
 
-add_project_arguments('-O2', language: 'c')
-
 install_headers('include/tgbot.h')
 #install_subdir('.', install_dir: 'C:/tgbot')
 lib = library(
@@ -23,12 +21,11 @@ lib = library(
 )
 
 # Example (windows)
-lib_inc_dir = include_directories('C:/include')
+#lib_inc_dir = include_directories('C:/include')
 executable(
     'example',
-    'examples/echobot/echobot.c',
+    'examples/inlinekeyboard/inlinekeyboard.c',
     dependencies: deps,
     link_with: lib,
-    include_directories: lib_inc_dir,
-    win_subsystem: 'console',
+    include_directories: inc_dir,
 )
