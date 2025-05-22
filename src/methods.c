@@ -212,7 +212,7 @@ tgbot_rc tgbot_get_me(tgbot *bot, tgbot_me *me) {
 	return TGBOT_OK;
 }
 
-tgbot_rc tgbot_send_message(tgbot *bot, int64_t chat_id, char *text, char *parse_mode, tgbot_inlinekeyboard *keyboard) {
+tgbot_rc tgbot_send_message(tgbot *bot, int64_t chat_id, const char *text, const char *parse_mode, tgbot_inlinekeyboard *keyboard) {
 	char url[1024];
 
 	json_object *rjson = json_object_new_object();
@@ -230,20 +230,17 @@ tgbot_rc tgbot_send_message(tgbot *bot, int64_t chat_id, char *text, char *parse
 	struct memory_buffer *mb;
 	tgbot_rc ret = tgbot_request(bot, url, &mb, rjson);
 	json_object_put(rjson);
-	if (ret != TGBOT_OK) {
-		free(mb->data);
-		free(mb);
-
-		return TGBOT_SENDMESSAGE_ERROR;
-	}
-
 	free(mb->data);
 	free(mb);
+
+	if (ret != TGBOT_OK) {
+		return TGBOT_SENDMESSAGE_ERROR;
+	}
 
 	return TGBOT_OK;
 }
 
-tgbot_rc tgbot_edit_message_text(tgbot *bot, int64_t chat_id, long message_id, char *text, tgbot_inlinekeyboard *keyboard) {
+tgbot_rc tgbot_edit_message_text(tgbot *bot, int64_t chat_id, long message_id, const char *text, tgbot_inlinekeyboard *keyboard) {
 	char url[1024];
 
 	json_object *rjson = json_object_new_object();
@@ -259,10 +256,38 @@ tgbot_rc tgbot_edit_message_text(tgbot *bot, int64_t chat_id, long message_id, c
 	}
 
 	struct memory_buffer *mb;
-	tgbot_request(bot, url, &mb, rjson);
+	tgbot_rc ret = tgbot_request(bot, url, &mb, rjson);
 	json_object_put(rjson);
 	free(mb->data);
 	free(mb);
+
+	if (ret != TGBOT_OK) {
+		return TGBOT_EDITMESSAGETEXT_ERROR;
+	}
+
+	return TGBOT_OK;
+}
+
+tgbot_rc tgbot_send_dice(tgbot *bot, int64_t chat_id, const char *emoji) {
+	char url[1024];
+
+	json_object *rjson = json_object_new_object();
+	json_object_object_add(rjson, "chat_id", json_object_new_int64(chat_id));
+	if (emoji != NULL) {
+		json_object_object_add(rjson, "emoji", json_object_new_string(emoji));
+	}
+
+	snprintf(url, sizeof(url), "%ssendDice", bot->api);
+
+	struct memory_buffer *mb;
+	tgbot_rc ret = tgbot_request(bot, url, &mb, rjson);
+	json_object_put(rjson);
+	free(mb->data);
+	free(mb);
+
+	if (ret != TGBOT_OK) {
+		return TGBOT_SENDDICE_ERROR;
+	}
 
 	return TGBOT_OK;
 }

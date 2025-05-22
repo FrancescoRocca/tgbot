@@ -1,6 +1,8 @@
 #include <signal.h>
 #include <stdbool.h>
 #include <stdio.h>
+#include <string.h>
+
 #include <tgbot.h>
 
 bool run = true;
@@ -35,7 +37,12 @@ int main(void) {
 
 	while (run) {
 		tgbot_get_update(&bot, &update, NULL);
-		echo_message(&bot, &update);
+		if (strcmp(update.text, "/start") == 0) {
+			/* Send dice if /start otherwise echo the message */
+			tgbot_send_dice(&bot, update.chat_id, NULL);
+		} else {
+			echo_message(&bot, &update);
+		}
 	}
 
 	fprintf(stdout, "Closing...");

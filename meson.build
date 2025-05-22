@@ -24,7 +24,7 @@ lib = library(
 #lib_inc_dir = include_directories('C:/include')
 executable(
     'example',
-    'examples/inlinekeyboard/inlinekeyboard.c',
+    'examples/echobot/echobot.c',
     dependencies: deps,
     link_with: lib,
     include_directories: inc_dir,
