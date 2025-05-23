@@ -69,9 +69,9 @@ typedef struct tgbot_cbquery_t tgbot_cbquery;
 typedef void (*Callback)(tgbot *bot, tgbot_cbquery *query);
 
 /**
- * @brief A structure to represent error codes.
+ * @brief An enum to represent error codes.
  */
-enum tgbot_rc {
+enum tgbot_rc_t {
 	TGBOT_OK = 0,
 	TGBOT_INIT_ERROR,
 	TGBOT_REQUEST_ERROR,
@@ -82,6 +82,22 @@ enum tgbot_rc {
 	TGBOT_SENDDICE_ERROR,
 	TGBOT_TELEGRAM_OK_ERROR,
 };
-typedef enum tgbot_rc tgbot_rc;
+typedef enum tgbot_rc_t tgbot_rc;
+
+enum tgbot_json_opt_type_t {
+	tgbot_opt_int,
+	tgbot_opt_int64,
+	tgbot_opt_string,
+	tgbot_opt_inlinekeyboard,
+	tgbot_opt_null,
+};
+typedef enum tgbot_json_opt_type_t tgbot_json_opt_type;
+
+struct tgbot_json_option_t {
+	char key[32];
+	void *value;
+	tgbot_json_opt_type type;
+};
+typedef struct tgbot_json_option_t tgbot_json_option;
 
 #endif

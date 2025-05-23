@@ -2,6 +2,32 @@
 
 #include "json.h"
 
+json_object *tgbot_json_builder(tgbot_json_option *options, size_t optionslen) {
+	json_object *rjson = json_object_new_object();
+
+	for (size_t i = 0; i < optionslen; ++i) {
+		if (options[i].type == tgbot_opt_int) {
+			json_object_object_add(rjson, options[i].key, json_object_new_int(*((int32_t *)options[i].value)));
+		} else if (options[i].type == tgbot_opt_string) {
+			if (!options[i].value) {
+				continue;
+			}
+			json_object_object_add(rjson, options[i].key, json_object_new_string((char *)options[i].value));
+		} else if (options[i].type == tgbot_opt_int64) {
+			json_object_object_add(rjson, options[i].key, json_object_new_int64(*((int64_t *)options[i].value)));
+		} else if (options[i].type == tgbot_opt_inlinekeyboard) {
+			if (options[i].value != NULL) {
+				json_object *reply_markup = tgbot_new_inlinekeyboardmarkup((tgbot_inlinekeyboard *)options[i].value);
+				json_object_object_add(rjson, "reply_markup", reply_markup);
+			}
+		} else if (options[i].type == tgbot_opt_null) {
+			continue;
+		}
+	}
+
+	return rjson;
+}
+
 json_object *tgbot_new_inlinekeyboardmarkup(tgbot_inlinekeyboard *keyboard) {
 	json_object *reply_markup = json_object_new_object();
 	json_object *inline_keyboard_array = json_object_new_array();
