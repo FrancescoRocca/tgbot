@@ -10,15 +10,19 @@ tgbot_rc tgbot_get_update(tgbot *bot, tgbot_update *update, Callback cbq_handler
 	/* Clear Update */
 	memset(update, 0, sizeof(tgbot_update));
 
-	json_object *rjson = json_object_new_object();
-	json_object_object_add(rjson, "offset", json_object_new_int64(bot->offset));
-	json_object_object_add(rjson, "limit", json_object_new_int(1));
-	json_object_object_add(rjson, "timeout", json_object_new_int(30));
+	int limit = 1;
+	int timeout = 30;
+	tgbot_json_option options[3] = {
+		{"offset", &bot->offset, tgbot_opt_int64},
+		{"limit", &limit, tgbot_opt_int},
+		{"timeout", &timeout, tgbot_opt_int},
+	};
+	json_object *rjson = tgbot_json_builder(options, 3);
 
 	snprintf(url, sizeof(url), "%sgetUpdates", bot->api);
 
 	struct memory_buffer *mb;
-	tgbot_rc ret = tgbot_request(bot, url, &mb, rjson);
+	tgbot_rc ret = tgbot_request(url, &mb, rjson);
 	json_object_put(rjson);
 	if (ret != TGBOT_OK) {
 		free(mb->data);
@@ -69,41 +73,50 @@ tgbot_rc tgbot_parse_message(tgbot *bot, tgbot_update *update, json_object *resu
 
 	json_object *message = json_object_object_get(result, "message");
 	json_object *message_id = json_object_object_get(message, "message_id");
-	update->message_id = json_object_get_int(message_id);
+	if (message_id) {
+		update->message_id = json_object_get_int(message_id);
+	}
 
 	json_object *chat = json_object_object_get(message, "chat");
 	json_object *chat_id = json_object_object_get(chat, "id");
-	update->chat_id = json_object_get_int64(chat_id);
+	if (chat_id) {
+		update->chat_id = json_object_get_int64(chat_id);
+	}
 
 	json_object *chat_first_name = json_object_object_get(chat, "first_name");
-	strncpy(update->chat_first_name, json_object_get_string(chat_first_name), sizeof(update->chat_first_name) - 1);
-	json_object *chat_last_name = json_object_object_get(chat, "last_name");
-	if (chat_last_name != NULL) {
-		strncpy(update->chat_last_name, json_object_get_string(chat_last_name), sizeof(update->chat_last_name) - 1);
-	} else {
-		update->chat_last_name[0] = '\0';
+	if (chat_first_name) {
+		strncpy(update->chat_first_name, json_object_get_string(chat_first_name), sizeof(update->chat_first_name) - 1);
 	}
+
+	json_object *chat_last_name = json_object_object_get(chat, "last_name");
+	if (chat_last_name) {
+		strncpy(update->chat_last_name, json_object_get_string(chat_last_name), sizeof(update->chat_last_name) - 1);
+	}
+
 	json_object *chat_username = json_object_object_get(chat, "username");
 	if (chat_username != NULL) {
 		strncpy(update->chat_username, json_object_get_string(chat_username), sizeof(update->chat_username) - 1);
-	} else {
-		update->chat_username[0] = '\0';
 	}
+
 	json_object *chat_type = json_object_object_get(chat, "type");
-	strncpy(update->chat_type, json_object_get_string(chat_type), sizeof(update->chat_type) - 1);
+	if (chat_type) {
+		strncpy(update->chat_type, json_object_get_string(chat_type), sizeof(update->chat_type) - 1);
+	}
 
 	json_object *date = json_object_object_get(message, "date");
-	update->date = json_object_get_int(date);
+	if (date) {
+		update->date = json_object_get_int(date);
+	}
 
 	json_object *text = json_object_object_get(message, "text");
-	strncpy(update->text, json_object_get_string(text), sizeof(update->text) - 1);
+	if (text) {
+		strncpy(update->text, json_object_get_string(text), sizeof(update->text) - 1);
+	}
 
 	return TGBOT_OK;
 }
 
 tgbot_rc tgbot_parse_cbquery(tgbot *bot, tgbot_cbquery *query, json_object *result, Callback cbq_handler) {
-	/* TODO: add NULL checks */
-
 	json_object *update_id = json_object_object_get(result, "update_id");
 	bot->offset = json_object_get_int(update_id) + 1;
 	query->update_id = json_object_get_int(update_id);
@@ -111,11 +124,15 @@ tgbot_rc tgbot_parse_cbquery(tgbot *bot, tgbot_cbquery *query, json_object *resu
 	json_object *callback_query = json_object_object_get(result, "callback_query");
 	json_object *message = json_object_object_get(callback_query, "message");
 	json_object *message_id = json_object_object_get(message, "message_id");
-	query->message_id = json_object_get_int(message_id);
+	if (message_id) {
+		query->message_id = json_object_get_int(message_id);
+	}
 
 	json_object *chat = json_object_object_get(message, "chat");
 	json_object *chat_id = json_object_object_get(chat, "id");
-	query->chat_id = json_object_get_int64(chat_id);
+	if (chat_id) {
+		query->chat_id = json_object_get_int64(chat_id);
+	}
 
 	json_object *chat_username = json_object_object_get(chat, "username");
 	if (chat_username) {
@@ -159,38 +176,57 @@ size_t write_callback(void *ptr, size_t size, size_t nmemb, char **userdata) {
 	return real_size;
 }
 
-tgbot_rc tgbot_request(tgbot *bot, char *url, struct memory_buffer **mb, json_object *json) {
-	/* TODO: accept mb as NULL */
+size_t discard_callback(char *ptr, size_t size, size_t nmemb, void *userdata) {
+	return size * nmemb;
+}
+
+tgbot_rc tgbot_request(const char *url, struct memory_buffer **mb, json_object *json) {
+	CURL *curl = curl_easy_init();
+	if (!curl) {
+		return TGBOT_REQUEST_ERROR;
+	}
+
 	const char *json_string = NULL;
-	*mb = calloc(1, sizeof(struct memory_buffer));
 
 	struct curl_slist *headers = NULL;
 	headers = curl_slist_append(headers, "Accept: application/json");
 	headers = curl_slist_append(headers, "Content-Type: application/json");
 
-	curl_easy_setopt(bot->curl, CURLOPT_URL, url);
-	curl_easy_setopt(bot->curl, CURLOPT_HTTPHEADER, headers);
-	curl_easy_setopt(bot->curl, CURLOPT_WRITEFUNCTION, (curl_write_callback)write_callback);
-	curl_easy_setopt(bot->curl, CURLOPT_WRITEDATA, *mb);
-	curl_easy_setopt(bot->curl, CURLOPT_SSL_VERIFYPEER, 1L);
-	curl_easy_setopt(bot->curl, CURLOPT_TCP_KEEPALIVE, 30L);
+	curl_easy_setopt(curl, CURLOPT_URL, url);
+	curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
+
+	if (mb != NULL) {
+		*mb = calloc(1, sizeof(struct memory_buffer));
+		curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, (curl_write_callback)write_callback);
+		curl_easy_setopt(curl, CURLOPT_WRITEDATA, *mb);
+	} else {
+		curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, discard_callback);
+		curl_easy_setopt(curl, CURLOPT_WRITEDATA, NULL);
+	}
+
+	curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 1L);
+	curl_easy_setopt(curl, CURLOPT_TCP_KEEPALIVE, 30L);
 
 	if (json != NULL) {
 		json_string = json_object_to_json_string_ext(json, JSON_C_TO_STRING_PLAIN);
-		curl_easy_setopt(bot->curl, CURLOPT_POSTFIELDS, json_string);
+		curl_easy_setopt(curl, CURLOPT_POSTFIELDS, json_string);
 	}
 
-	CURLcode res = curl_easy_perform(bot->curl);
+	CURLcode res = curl_easy_perform(curl);
 
 	curl_slist_free_all(headers);
 
 	if (res != CURLE_OK) {
-		free((*mb)->data);
-		free(*mb);
-		*mb = NULL;
+		if (mb != NULL && *mb) {
+			free((*mb)->data);
+			free(*mb);
+			*mb = NULL;
+		}
 
 		return TGBOT_REQUEST_ERROR;
 	}
+
+	curl_easy_cleanup(curl);
 
 	return TGBOT_OK;
 }
@@ -200,7 +236,7 @@ tgbot_rc tgbot_get_me(tgbot *bot, tgbot_me *me) {
 	snprintf(url, sizeof(url), "%sgetMe", bot->api);
 
 	struct memory_buffer *mb;
-	tgbot_rc ret = tgbot_request(bot, url, &mb, NULL);
+	tgbot_rc ret = tgbot_request(url, &mb, NULL);
 	if (ret != TGBOT_OK) {
 		free(mb->data);
 		free(mb);
@@ -239,16 +275,12 @@ tgbot_rc tgbot_send_message(tgbot *bot, int64_t chat_id, const char *text, const
 		{"parse_mode", (void *)parse_mode, tgbot_opt_string},
 		{"reply_markup", keyboard, tgbot_opt_inlinekeyboard},
 	};
-
 	json_object *rjson = tgbot_json_builder(options, 4);
 
 	snprintf(url, sizeof(url), "%ssendMessage", bot->api);
 
-	struct memory_buffer *mb;
-	tgbot_rc ret = tgbot_request(bot, url, &mb, rjson);
+	tgbot_rc ret = tgbot_request(url, NULL, rjson);
 	json_object_put(rjson);
-	free(mb->data);
-	free(mb);
 
 	if (ret != TGBOT_OK) {
 		return TGBOT_SENDMESSAGE_ERROR;
@@ -266,16 +298,12 @@ tgbot_rc tgbot_edit_message_text(tgbot *bot, int64_t chat_id, long message_id, c
 		{"text", (void *)text, tgbot_opt_string},
 		{"reply_markup", keyboard, tgbot_opt_inlinekeyboard},
 	};
-
 	json_object *rjson = tgbot_json_builder(options, 4);
 
 	snprintf(url, sizeof(url), "%seditMessageText", bot->api);
 
-	struct memory_buffer *mb;
-	tgbot_rc ret = tgbot_request(bot, url, &mb, rjson);
+	tgbot_rc ret = tgbot_request(url, NULL, rjson);
 	json_object_put(rjson);
-	free(mb->data);
-	free(mb);
 
 	if (ret != TGBOT_OK) {
 		return TGBOT_EDITMESSAGETEXT_ERROR;
@@ -291,16 +319,12 @@ tgbot_rc tgbot_send_dice(tgbot *bot, int64_t chat_id, const char *emoji) {
 		{"chat_id", &chat_id, tgbot_opt_int64},
 		{"emoji", (void *)emoji, tgbot_opt_string},
 	};
-
 	json_object *rjson = tgbot_json_builder(options, 2);
 
 	snprintf(url, sizeof(url), "%ssendDice", bot->api);
 
-	struct memory_buffer *mb;
-	tgbot_rc ret = tgbot_request(bot, url, &mb, rjson);
+	tgbot_rc ret = tgbot_request(url, NULL, rjson);
 	json_object_put(rjson);
-	free(mb->data);
-	free(mb);
 
 	if (ret != TGBOT_OK) {
 		return TGBOT_SENDDICE_ERROR;

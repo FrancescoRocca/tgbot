@@ -10,7 +10,7 @@ tgbot_rc tgbot_parse_cbquery(tgbot *bot, tgbot_cbquery *query, json_object *resu
 
 /* Request */
 size_t write_callback(void *ptr, size_t size, size_t nmemb, char **userdata);
-tgbot_rc tgbot_request(tgbot *bot, char *url, struct memory_buffer **mb, json_object *json);
+tgbot_rc tgbot_request(const char *url, struct memory_buffer **mb, json_object *json);
 
 /* Methods */
 tgbot_rc tgbot_get_me(tgbot *bot, tgbot_me *me);

@@ -19,7 +19,6 @@ struct tgbot_t {
 	char token[128]; /**< Bot token. */
 	char api[512];	 /**< Bot API url. */
 	int32_t offset;	 /**< Bot offset. */
-	CURL *curl;		 /**< Curl object, used to send http requests. */
 };
 typedef struct tgbot_t tgbot;
 
