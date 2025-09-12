@@ -11,8 +11,8 @@ json_c_dep = dependency('json-c')
 deps = [curl_dep, json_c_dep]
 
 install_headers('include/tgbot.h')
-#install_subdir('.', install_dir: 'C:/tgbot')
-lib = library(
+
+tgbot_lib = library(
     'tgbot',
     sources,
     dependencies: deps,
@@ -21,11 +21,10 @@ lib = library(
 )
 
 # Example (windows)
-#lib_inc_dir = include_directories('C:/include')
 executable(
     'example',
     'examples/echobot/echobot.c',
     dependencies: deps,
-    link_with: lib,
+    link_with: tgbot_lib,
     include_directories: inc_dir,
 )
