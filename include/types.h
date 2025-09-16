@@ -3,25 +3,27 @@
 
 #include "common.h"
 
+#define TEXT_SIZE 200
+#define URL_SIZE 200
+#define CB_DATA_SIZE 64
+
 /**
  * @brief Represents a single button on an inline keyboard.
  */
-struct tgbot_inlinekeyboardbutton_t {
-	char text[200];			/**< Text of the button. If empty, the button is ignored. */
-	char url[200];			/**< (Optional) URL to be opened when the button is pressed. */
-	char callback_data[64]; /**< (Optional) Data sent to the bot when the button is pressed. */
-};
-typedef struct tgbot_inlinekeyboardbutton_t tgbot_inlinekeyboardbutton;
+typedef struct tgbot_inlinekeyboardbutton {
+	char text[TEXT_SIZE];			  /**< Text of the button. If empty, the button is ignored. */
+	char url[URL_SIZE];				  /**< (Optional) URL to be opened when the button is pressed. */
+	char callback_data[CB_DATA_SIZE]; /**< (Optional) Data sent to the bot when the button is pressed. */
+} tgbot_inlinekeyboardbutton_s;
 
 /**
  * @brief Represents an inline keyboard.
  */
-struct tgbot_inlinekeyboard_t {
-	size_t rows;								  /**< Number of rows in the keyboard. */
-	size_t columns;								  /**< Number of columns per row. */
-	struct tgbot_inlinekeyboardbutton_t *buttons; /**< Array of buttons. */
-};
-typedef struct tgbot_inlinekeyboard_t tgbot_inlinekeyboard;
+typedef struct tgbot_inlinekeyboard {
+	size_t rows;						   /**< Number of rows in the keyboard. */
+	size_t columns;						   /**< Number of columns per row. */
+	tgbot_inlinekeyboardbutton_s *buttons; /**< Array of buttons. */
+} tgbot_inlinekeyboard_s;
 
 /**
  * @brief Allocates a new inline keyboard.
@@ -31,7 +33,7 @@ typedef struct tgbot_inlinekeyboard_t tgbot_inlinekeyboard;
  *
  * @return The pointer to the keyboard or NULL on allocation failure.
  */
-tgbot_inlinekeyboard *tgbot_new_inlinekeyboard(size_t rows, size_t columns);
+tgbot_inlinekeyboard_s *tgbot_inlinekb_new(size_t rows, size_t columns);
 
 /**
  * @brief Adds or updates a button at the specified position in the keyboard.
@@ -45,7 +47,7 @@ tgbot_inlinekeyboard *tgbot_new_inlinekeyboard(size_t rows, size_t columns);
  *
  * @return TGBOT_OK on success.
  */
-tgbot_rc tgbot_inlinekeyboard_button(tgbot_inlinekeyboard *keyboard, size_t row, size_t column, const char *text, const char *url, const char *callback_data);
+tgbot_rc tgbot_inlinekb_button(tgbot_inlinekeyboard_s *keyboard, size_t row, size_t column, const char *text, const char *url, const char *callback_data);
 
 /**
  * @brief Returns a pointer to the keyboard's button.
@@ -56,13 +58,13 @@ tgbot_rc tgbot_inlinekeyboard_button(tgbot_inlinekeyboard *keyboard, size_t row,
  *
  * @return Pointer to the button, or NULL if the position is invalid.
  */
-tgbot_inlinekeyboardbutton *tgbot_inlinekeyboard_button_at(tgbot_inlinekeyboard *keyboard, size_t row, size_t column);
+tgbot_inlinekeyboardbutton_s *tgbot_inlinekb_button_at(tgbot_inlinekeyboard_s *keyboard, size_t row, size_t column);
 
 /**
  * @brief Frees all memory associated with the given inline keyboard.
  *
  * @param[in,out] keyboard Pointer to the keyboard structure to deallocate.
  */
-void tgbot_destroy_inlinekeyboard(tgbot_inlinekeyboard *keyboard);
+void tgbot_inlinekb_free(tgbot_inlinekeyboard_s *keyboard);
 
 #endif

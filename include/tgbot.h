@@ -6,20 +6,19 @@
 #include "types.h"
 
 /**
- * @brief Initializes the Bot object.
+ * @brief Create a new Bot object.
  *
- * @param[out] bot The Bot object.
  * @param[in] token The Bot token (obtained from @BotFather).
  *
- * @return TGBOT_OK on success.
+ * @return Bot pointer.
  */
-tgbot_rc tgbot_init(tgbot *bot, char *token);
+tgbot_s *tgbot_new(char *token);
 
 /**
  * @brief Cleans the memory.
  *
  * @param[out] bot The Bot object.
  */
-void tgbot_destroy(tgbot *bot);
+void tgbot_free(tgbot_s *bot);
 
 #endif // TGBOT_H

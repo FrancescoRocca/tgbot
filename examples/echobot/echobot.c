@@ -11,7 +11,7 @@ void sighandler(int signum) {
 	run = false;
 }
 
-void echo_message(tgbot *bot, tgbot_update *update) {
+void echo_message(tgbot_s *bot, tgbot_update_s *update) {
 	tgbot_send_message(bot, update->chat_id, update->text, "MARKDOWN", NULL);
 }
 
@@ -31,22 +31,21 @@ int main(void) {
 	signal(SIGINT, sighandler);
 
 	/* Initialize bot */
-	tgbot bot;
-	tgbot_init(&bot, token);
-	tgbot_update update;
+	tgbot_s *bot = tgbot_new(token);
+	tgbot_update_s update;
 
 	while (run) {
-		tgbot_get_update(&bot, &update, NULL);
+		tgbot_get_update(bot, &update, NULL);
 		if (strcmp(update.text, "/start") == 0) {
 			/* Send dice if /start otherwise echo the message */
-			tgbot_send_dice(&bot, update.chat_id, NULL);
+			tgbot_send_dice(bot, update.chat_id, NULL);
 		} else {
-			echo_message(&bot, &update);
+			echo_message(bot, &update);
 		}
 	}
 
 	fprintf(stdout, "Closing...");
-	tgbot_destroy(&bot);
+	tgbot_free(bot);
 
 	return 0;
 }

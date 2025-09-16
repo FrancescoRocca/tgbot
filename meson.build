@@ -1,4 +1,9 @@
-project('tgbot', 'c', version: '0.1')
+project(
+    'tgbot',
+    'c',
+    version: '0.1',
+    default_options: ['warning_level=3', 'c_std=c18'],
+)
 
 sources = []
 subdir('src')

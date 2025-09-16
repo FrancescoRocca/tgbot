@@ -4,11 +4,10 @@
 #include "json.h"
 #include "methods.h"
 
-tgbot_rc tgbot_get_update(tgbot *bot, tgbot_update *update, Callback cbq_handler) {
+tgbot_rc tgbot_get_update(tgbot_s *bot, tgbot_update_s *update, Callback cbq_handler) {
 	char url[1024];
 
-	/* Clear Update */
-	memset(update, 0, sizeof(tgbot_update));
+	memset(update, 0, sizeof(tgbot_update_s));
 
 	int limit = 1;
 	int timeout = 30;
@@ -17,7 +16,7 @@ tgbot_rc tgbot_get_update(tgbot *bot, tgbot_update *update, Callback cbq_handler
 		{"limit", &limit, tgbot_opt_int},
 		{"timeout", &timeout, tgbot_opt_int},
 	};
-	json_object *rjson = tgbot_json_builder(options, 3);
+	json_object *rjson = json_builder(options, 3);
 
 	snprintf(url, sizeof(url), "%sgetUpdates", bot->api);
 
@@ -57,7 +56,7 @@ tgbot_rc tgbot_get_update(tgbot *bot, tgbot_update *update, Callback cbq_handler
 	if (message) {
 		tgbot_parse_message(bot, update, result);
 	} else if (cbq_handler != NULL) {
-		tgbot_cbquery query;
+		tgbot_cbquery_s query;
 		tgbot_parse_cbquery(bot, &query, result, cbq_handler);
 	}
 
@@ -66,7 +65,7 @@ tgbot_rc tgbot_get_update(tgbot *bot, tgbot_update *update, Callback cbq_handler
 	return TGBOT_OK;
 }
 
-tgbot_rc tgbot_parse_message(tgbot *bot, tgbot_update *update, json_object *result) {
+tgbot_rc tgbot_parse_message(tgbot_s *bot, tgbot_update_s *update, json_object *result) {
 	json_object *update_id = json_object_object_get(result, "update_id");
 	bot->offset = json_object_get_int(update_id) + 1;
 	update->update_id = json_object_get_int(update_id);
@@ -116,7 +115,7 @@ tgbot_rc tgbot_parse_message(tgbot *bot, tgbot_update *update, json_object *resu
 	return TGBOT_OK;
 }
 
-tgbot_rc tgbot_parse_cbquery(tgbot *bot, tgbot_cbquery *query, json_object *result, Callback cbq_handler) {
+tgbot_rc tgbot_parse_cbquery(tgbot_s *bot, tgbot_cbquery_s *query, json_object *result, Callback cbq_handler) {
 	json_object *update_id = json_object_object_get(result, "update_id");
 	bot->offset = json_object_get_int(update_id) + 1;
 	query->update_id = json_object_get_int(update_id);
@@ -231,7 +230,7 @@ tgbot_rc tgbot_request(const char *url, struct memory_buffer **mb, json_object *
 	return TGBOT_OK;
 }
 
-tgbot_rc tgbot_get_me(tgbot *bot, tgbot_me *me) {
+tgbot_rc tgbot_get_me(tgbot_s *bot, tgbot_me_s *me) {
 	char url[1024];
 	snprintf(url, sizeof(url), "%sgetMe", bot->api);
 
@@ -266,7 +265,7 @@ tgbot_rc tgbot_get_me(tgbot *bot, tgbot_me *me) {
 	return TGBOT_OK;
 }
 
-tgbot_rc tgbot_send_message(tgbot *bot, int64_t chat_id, const char *text, const char *parse_mode, tgbot_inlinekeyboard *keyboard) {
+tgbot_rc tgbot_send_message(tgbot_s *bot, int64_t chat_id, const char *text, const char *parse_mode, tgbot_inlinekeyboard_s *keyboard) {
 	char url[1024];
 
 	tgbot_json_option options[4] = {
@@ -275,7 +274,7 @@ tgbot_rc tgbot_send_message(tgbot *bot, int64_t chat_id, const char *text, const
 		{"parse_mode", (void *)parse_mode, tgbot_opt_string},
 		{"reply_markup", keyboard, tgbot_opt_inlinekeyboard},
 	};
-	json_object *rjson = tgbot_json_builder(options, 4);
+	json_object *rjson = json_builder(options, 4);
 
 	snprintf(url, sizeof(url), "%ssendMessage", bot->api);
 
@@ -289,7 +288,7 @@ tgbot_rc tgbot_send_message(tgbot *bot, int64_t chat_id, const char *text, const
 	return TGBOT_OK;
 }
 
-tgbot_rc tgbot_edit_message_text(tgbot *bot, int64_t chat_id, long message_id, const char *text, tgbot_inlinekeyboard *keyboard) {
+tgbot_rc tgbot_edit_message_text(tgbot_s *bot, int64_t chat_id, long message_id, const char *text, tgbot_inlinekeyboard_s *keyboard) {
 	char url[1024];
 
 	tgbot_json_option options[4] = {
@@ -298,7 +297,7 @@ tgbot_rc tgbot_edit_message_text(tgbot *bot, int64_t chat_id, long message_id, c
 		{"text", (void *)text, tgbot_opt_string},
 		{"reply_markup", keyboard, tgbot_opt_inlinekeyboard},
 	};
-	json_object *rjson = tgbot_json_builder(options, 4);
+	json_object *rjson = json_builder(options, 4);
 
 	snprintf(url, sizeof(url), "%seditMessageText", bot->api);
 
@@ -312,14 +311,14 @@ tgbot_rc tgbot_edit_message_text(tgbot *bot, int64_t chat_id, long message_id, c
 	return TGBOT_OK;
 }
 
-tgbot_rc tgbot_send_dice(tgbot *bot, int64_t chat_id, const char *emoji) {
+tgbot_rc tgbot_send_dice(tgbot_s *bot, int64_t chat_id, const char *emoji) {
 	char url[1024];
 
 	tgbot_json_option options[2] = {
 		{"chat_id", &chat_id, tgbot_opt_int64},
 		{"emoji", (void *)emoji, tgbot_opt_string},
 	};
-	json_object *rjson = tgbot_json_builder(options, 2);
+	json_object *rjson = json_builder(options, 2);
 
 	snprintf(url, sizeof(url), "%ssendDice", bot->api);
 
