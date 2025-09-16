@@ -4,6 +4,22 @@
 #include "json.h"
 #include "methods.h"
 
+static size_t write_callback(void *ptr, size_t size, size_t nmemb, char **userdata) {
+	size_t real_size = size * nmemb;
+	struct memory_buffer *mem = (struct memory_buffer *)userdata;
+
+	mem->data = realloc(mem->data, mem->size + real_size + 1);
+	memcpy(&(mem->data[mem->size]), ptr, real_size);
+	mem->size += real_size;
+	mem->data[mem->size] = '\0';
+
+	return real_size;
+}
+
+static size_t discard_callback(char *ptr, size_t size, size_t nmemb, void *userdata) {
+	return size * nmemb;
+}
+
 tgbot_rc tgbot_get_update(tgbot_s *bot, tgbot_update_s *update, Callback cbq_handler) {
 	char url[1024];
 
@@ -161,22 +177,6 @@ tgbot_rc tgbot_parse_cbquery(tgbot_s *bot, tgbot_cbquery_s *query, json_object *
 	cbq_handler(bot, query);
 
 	return TGBOT_OK;
-}
-
-size_t write_callback(void *ptr, size_t size, size_t nmemb, char **userdata) {
-	size_t real_size = size * nmemb;
-	struct memory_buffer *mem = (struct memory_buffer *)userdata;
-
-	mem->data = realloc(mem->data, mem->size + real_size + 1);
-	memcpy(&(mem->data[mem->size]), ptr, real_size);
-	mem->size += real_size;
-	mem->data[mem->size] = '\0';
-
-	return real_size;
-}
-
-size_t discard_callback(char *ptr, size_t size, size_t nmemb, void *userdata) {
-	return size * nmemb;
 }
 
 tgbot_rc tgbot_request(const char *url, struct memory_buffer **mb, json_object *json) {

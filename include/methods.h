@@ -9,7 +9,6 @@ tgbot_rc tgbot_parse_message(tgbot_s *bot, tgbot_update_s *update, json_object *
 tgbot_rc tgbot_parse_cbquery(tgbot_s *bot, tgbot_cbquery_s *query, json_object *result, Callback query_handler);
 
 /* Request */
-size_t write_callback(void *ptr, size_t size, size_t nmemb, char **userdata);
 tgbot_rc tgbot_request(const char *url, struct memory_buffer **mb, json_object *json);
 
 /* Methods */

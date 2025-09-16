@@ -5,8 +5,10 @@
 
 tgbot_inlinekeyboard_s *tgbot_inlinekb_new(size_t rows, size_t columns) {
 	tgbot_inlinekeyboard_s *keyboard = (tgbot_inlinekeyboard_s *)malloc(sizeof(tgbot_inlinekeyboard_s));
-	if (!keyboard)
+	if (!keyboard) {
 		return NULL;
+	}
+
 	keyboard->rows = rows;
 	keyboard->columns = columns;
 	keyboard->buttons = (tgbot_inlinekeyboardbutton_s *)malloc(rows * columns * sizeof(tgbot_inlinekeyboardbutton_s));
