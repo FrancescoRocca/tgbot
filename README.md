@@ -1,8 +1,9 @@
 # tgbot
-A minimal C Telegram API Framework
+
+A minimal C Telegram API Framework.
 
 ## Requirements
-- meson
+
 - libcurl
 - json-c
 
@@ -39,19 +40,23 @@ $ meson install
 </details>
 
 ## Examples
+
 You can find some examples [here](./examples/).
 
 ### Supported Types
+
 - **InlineKeyboardMarkup**
   - Note: Standard `KeyboardMarkup` is intentionally not supported.
 
 #### Supported Methods
+
 - `getMe`
 - `sendMessage`
 - `editMessageText`
 - `sendDice`
 
 ## Roadmap
+
 - `sendPhoto`
 - `sendAudio`
 - `sendDocument`
