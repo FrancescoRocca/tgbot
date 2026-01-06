@@ -1,8 +1,8 @@
+BasedOnStyle: LLVM
 UseTab: Always
-IndentWidth: 4
 TabWidth: 4
-ColumnLimit: 0
-AllowAllParametersOfDeclarationOnNextLine: false
-BreakBeforeBinaryOperators: None
-SpacesInParentheses: false
-BinPackParameters: true
+IndentWidth: 4
+IndentCaseLabels: true
+ColumnLimit: 120
+PointerAlignment: Right
+AllowShortFunctionsOnASingleLine: None
