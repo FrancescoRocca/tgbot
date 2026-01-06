@@ -1,8 +1,8 @@
 project(
-    'tgbot',
-    'c',
-    version: '0.1',
-    default_options: ['warning_level=3', 'c_std=c18'],
+  'tgbot',
+  'c',
+  version: '0.1',
+  default_options: ['warning_level=3', 'c_std=c18'],
 )
 
 sources = []
@@ -18,18 +18,22 @@ deps = [curl_dep, json_c_dep]
 install_headers('include/tgbot.h')
 
 tgbot_lib = library(
-    'tgbot',
-    sources,
-    dependencies: deps,
-    include_directories: inc_dir,
-    install: true,
+  'tgbot',
+  sources,
+  dependencies: deps,
+  include_directories: inc_dir,
+  install: true,
 )
 
-# Example (windows)
+tgbot_dep = declare_dependency(
+  link_with: tgbot_lib,
+  include_directories: inc_dir,
+  dependencies: deps,
+)
+
+# Example
 executable(
-    'example',
-    'examples/echobot/echobot.c',
-    dependencies: deps,
-    link_with: tgbot_lib,
-    include_directories: inc_dir,
+  'example',
+  'examples/echobot/echobot.c',
+  dependencies: tgbot_dep,
 )
