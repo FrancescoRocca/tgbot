@@ -1,14 +1,23 @@
 #include <curl/curl.h>
+#include <curl/easy.h>
+#include <stdio.h>
 #include <string.h>
 
+#include "common.h"
 #include "json.h"
+#include "json_object.h"
 #include "methods.h"
 
-static size_t write_callback(void *ptr, size_t size, size_t nmemb, char **userdata) {
+static size_t write_callback(void *ptr, size_t size, size_t nmemb, char *userdata) {
 	size_t real_size = size * nmemb;
 	struct memory_buffer *mem = (struct memory_buffer *)userdata;
 
-	mem->data = realloc(mem->data, mem->size + real_size + 1);
+	char *tmp = realloc(mem->data, mem->size + real_size + 1);
+	if (!tmp) {
+		return 0;
+	}
+	mem->data = tmp;
+
 	memcpy(&(mem->data[mem->size]), ptr, real_size);
 	mem->size += real_size;
 	mem->data[mem->size] = '\0';
@@ -17,6 +26,8 @@ static size_t write_callback(void *ptr, size_t size, size_t nmemb, char **userda
 }
 
 static size_t discard_callback(char *ptr, size_t size, size_t nmemb, void *userdata) {
+	(void)userdata;
+	(void)ptr;
 	return size * nmemb;
 }
 
@@ -40,8 +51,10 @@ tgbot_rc tgbot_get_update(tgbot_s *bot, tgbot_update_s *update, Callback cbq_han
 	tgbot_rc ret = tgbot_request(url, &mb, rjson);
 	json_object_put(rjson);
 	if (ret != TGBOT_OK) {
-		free(mb->data);
-		free(mb);
+		if (mb) {
+			free(mb->data);
+			free(mb);
+		}
 
 		return TGBOT_GETUPDATES_ERROR;
 	}
@@ -125,7 +138,7 @@ tgbot_rc tgbot_parse_message(tgbot_s *bot, tgbot_update_s *update, json_object *
 
 	json_object *text = json_object_object_get(message, "text");
 	if (text) {
-		strncpy(update->text, json_object_get_string(text), sizeof(update->text) - 1);
+		snprintf(update->text, sizeof(update->text), "%s", json_object_get_string(text));
 	}
 
 	return TGBOT_OK;
@@ -216,6 +229,7 @@ tgbot_rc tgbot_request(const char *url, struct memory_buffer **mb, json_object *
 	curl_slist_free_all(headers);
 
 	if (res != CURLE_OK) {
+		curl_easy_cleanup(curl);
 		if (mb != NULL && *mb) {
 			free((*mb)->data);
 			free(*mb);
