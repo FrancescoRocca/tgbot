@@ -47,7 +47,8 @@ tgbot_inlinekeyboard_s *tgbot_inlinekb_new(size_t rows, size_t columns);
  *
  * @return TGBOT_OK on success.
  */
-tgbot_rc tgbot_inlinekb_button(tgbot_inlinekeyboard_s *keyboard, size_t row, size_t column, const char *text, const char *url, const char *callback_data);
+tgbot_rc tgbot_inlinekb_button(tgbot_inlinekeyboard_s *keyboard, size_t row, size_t column, const char *text,
+							   const char *url, const char *callback_data);
 
 /**
  * @brief Returns a pointer to the keyboard's button.

@@ -2,8 +2,6 @@
 #define TGBOT_MAIN_H
 
 #include "common.h"
-#include "methods.h"
-#include "types.h"
 
 /**
  * @brief Create a new Bot object.
