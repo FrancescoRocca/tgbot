@@ -8,6 +8,7 @@
 bool run = true;
 
 void sighandler(int signum) {
+	(void)signum;
 	run = false;
 }
 
