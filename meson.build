@@ -34,6 +34,6 @@ tgbot_dep = declare_dependency(
 # Example
 executable(
   'example',
-  'examples/echobot/echobot.c',
+  'examples/inlinekeyboard/inlinekeyboard.c',
   dependencies: tgbot_dep,
 )

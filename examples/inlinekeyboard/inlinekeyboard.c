@@ -35,6 +35,7 @@ void callback_handler(tgbot_s *bot, tgbot_cbquery_s *query) {
 }
 
 void sighandler(int signum) {
+	(void)signum;
 	fprintf(stdout, "Closing...\n");
 	run = false;
 }
