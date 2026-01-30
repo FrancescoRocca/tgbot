@@ -4,12 +4,8 @@
 #include "types.h"
 #include <json-c/json.h>
 
+/* Retrieve update */
 tgbot_rc tgbot_get_update(tgbot_s *bot, tgbot_update_s *update, Callback cbq_handler);
-tgbot_rc tgbot_parse_message(tgbot_s *bot, tgbot_update_s *update, json_object *result);
-tgbot_rc tgbot_parse_cbquery(tgbot_s *bot, tgbot_cbquery_s *query, json_object *result, Callback query_handler);
-
-/* Request */
-tgbot_rc tgbot_request(const char *url, struct memory_buffer **mb, json_object *json);
 
 /* Methods */
 tgbot_rc tgbot_get_me(tgbot_s *bot, tgbot_me_s *me);

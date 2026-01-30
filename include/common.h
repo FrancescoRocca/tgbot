@@ -6,6 +6,7 @@
 
 #define TOKEN_SIZE 128
 #define API_SIZE 512
+#define URL_LEN 1024
 
 #define FIRSTNAME_SIZE 256
 #define USERNAME_SIZE 32
@@ -76,7 +77,7 @@ typedef void (*Callback)(tgbot_s *bot, tgbot_cbquery_s *query);
 /**
  * @brief An enum to represent error codes.
  */
-enum tgbot_rc_t {
+enum tgbot_rc {
 	TGBOT_OK = 0,
 	TGBOT_INIT_ERROR,
 	TGBOT_REQUEST_ERROR,
@@ -87,22 +88,22 @@ enum tgbot_rc_t {
 	TGBOT_SENDDICE_ERROR,
 	TGBOT_TELEGRAM_OK_ERROR,
 };
-typedef enum tgbot_rc_t tgbot_rc;
+typedef enum tgbot_rc tgbot_rc;
 
-enum tgbot_json_opt_type_t {
+enum tgbot_opt_type {
 	tgbot_opt_int,
 	tgbot_opt_int64,
 	tgbot_opt_string,
 	tgbot_opt_inlinekeyboard,
 	tgbot_opt_null,
 };
-typedef enum tgbot_json_opt_type_t tgbot_json_opt_type;
+typedef enum tgbot_opt_type tgbot_opt_type_e;
 
-struct tgbot_json_option_t {
+struct tgbot_option {
 	char key[32];
 	void *value;
-	tgbot_json_opt_type type;
+	tgbot_opt_type_e type;
 };
-typedef struct tgbot_json_option_t tgbot_json_option;
+typedef struct tgbot_option tgbot_option_s;
 
 #endif
