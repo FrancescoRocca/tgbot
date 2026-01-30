@@ -8,9 +8,8 @@
 
 #define WELCOME_MSG "Hi there! This bot is coded in C."
 
-void parse_command(tgbot_s *bot, tgbot_update_s *update);
+void parse_command(const tgbot_s *bot, const tgbot_update_s *update);
 void sighandler(int signum);
-void callback_parser(tgbot_s *bot, tgbot_cbquery_s *query);
 
 bool run = true;
 tgbot_s *bot;
@@ -40,7 +39,7 @@ void sighandler(int signum) {
 	run = false;
 }
 
-void parse_command(tgbot_s *bot, tgbot_update_s *update) {
+void parse_command(const tgbot_s *bot, const tgbot_update_s *update) {
 	tgbot_rc ret;
 
 	if (strcmp("/start", update->text) == 0) {
@@ -64,7 +63,6 @@ int main(void) {
 	/* Find "your" way to free the resources */
 	signal(SIGINT, sighandler);
 
-	tgbot_rc ret;
 	char token[256];
 
 	FILE *fp = fopen(".token", "r");
@@ -72,7 +70,7 @@ int main(void) {
 		fprintf(stderr, "No .token file found!\n");
 		exit(EXIT_FAILURE);
 	}
-	fscanf(fp, "%s", token);
+	fscanf(fp, "%255s", token);
 	fprintf(stdout, "Token: %s\n", token);
 	fclose(fp);
 
@@ -102,7 +100,7 @@ int main(void) {
 
 	/* Main loop */
 	while (run) {
-		ret = tgbot_get_update(bot, &update, callback_handler);
+		tgbot_rc ret = tgbot_get_update(bot, &update, callback_handler);
 		if (ret != TGBOT_OK) {
 			fprintf(stderr, "tgbot_get_updates()\n");
 			continue;

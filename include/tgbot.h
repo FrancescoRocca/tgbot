@@ -12,7 +12,7 @@
  *
  * @return Bot pointer.
  */
-tgbot_s *tgbot_new(char *token);
+tgbot_s *tgbot_new(const char *token);
 
 /**
  * @brief Cleans the memory.

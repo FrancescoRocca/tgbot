@@ -6,7 +6,7 @@
 
 #include "tgbot.h"
 
-tgbot_s *tgbot_new(char *token) {
+tgbot_s *tgbot_new(const char *token) {
 	tgbot_s *bot = malloc(sizeof(tgbot_s));
 	if (!bot) {
 		return NULL;

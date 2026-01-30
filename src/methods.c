@@ -85,7 +85,7 @@ static tgbot_rc tgbot_request(const char *url, struct memory_buffer **mb, json_o
 	return TGBOT_OK;
 }
 
-static tgbot_rc tgbot_execute_method(tgbot_s *bot, const char *method, tgbot_option_s *options, size_t optlen) {
+static tgbot_rc tgbot_execute_method(const tgbot_s *bot, const char *method, tgbot_option_s *options, size_t optlen) {
 	char url[URL_LEN] = {0};
 	snprintf(url, sizeof(url), "%s%s", bot->api, method);
 
@@ -128,14 +128,14 @@ tgbot_rc tgbot_get_update(tgbot_s *bot, tgbot_update_s *update, Callback cbq_han
 	free(mb->data);
 	free(mb);
 
-	json_object *ok = json_object_object_get(json, "ok");
+	const json_object *ok = json_object_object_get(json, "ok");
 	if (!json_object_is_type(ok, json_type_boolean) || !json_object_get_boolean(ok)) {
 		json_object_put(json);
 
 		return TGBOT_TELEGRAM_OK_ERROR;
 	}
 
-	json_object *results = json_object_object_get(json, "result");
+	const json_object *results = json_object_object_get(json, "result");
 	size_t results_len = json_object_array_length(results);
 
 	if (results_len == 0) {
@@ -146,7 +146,7 @@ tgbot_rc tgbot_get_update(tgbot_s *bot, tgbot_update_s *update, Callback cbq_han
 
 	/* Check if it is a Message or a CallbackQuery*/
 	json_object *result = json_object_array_get_idx(results, 0);
-	json_object *message = json_object_object_get(result, "message");
+	const json_object *message = json_object_object_get(result, "message");
 	if (message) {
 		tgbot_parse_message(bot, update, result);
 	} else if (cbq_handler != NULL) {
@@ -159,7 +159,7 @@ tgbot_rc tgbot_get_update(tgbot_s *bot, tgbot_update_s *update, Callback cbq_han
 	return TGBOT_OK;
 }
 
-tgbot_rc tgbot_get_me(tgbot_s *bot, tgbot_me_s *me) {
+tgbot_rc tgbot_get_me(const tgbot_s *bot, tgbot_me_s *me) {
 	char url[URL_LEN];
 	snprintf(url, sizeof(url), "%sgetMe", bot->api);
 
@@ -176,25 +176,26 @@ tgbot_rc tgbot_get_me(tgbot_s *bot, tgbot_me_s *me) {
 	free(mb->data);
 	free(mb);
 
-	json_object *ok = json_object_object_get(json, "ok");
+	const json_object *ok = json_object_object_get(json, "ok");
 	if (!json_object_get_boolean(ok)) {
 		json_object_put(json);
 
 		return TGBOT_GETME_ERROR;
 	}
 
-	json_object *result = json_object_object_get(json, "result");
+	const json_object *result = json_object_object_get(json, "result");
 	json_object *first_name = json_object_object_get(result, "first_name");
-	strncpy(me->first_name, json_object_get_string(first_name), sizeof(me->first_name) - 1);
+	snprintf(me->first_name, sizeof(me->first_name), "%s", json_object_get_string(first_name));
+
 	json_object *username = json_object_object_get(result, "username");
-	strncpy(me->username, json_object_get_string(username), sizeof(me->username) - 1);
+	snprintf(me->username, sizeof(me->username), "%s", json_object_get_string(username));
 
 	json_object_put(json);
 
 	return TGBOT_OK;
 }
 
-tgbot_rc tgbot_send_message(tgbot_s *bot, int64_t chat_id, const char *text, const char *parse_mode,
+tgbot_rc tgbot_send_message(const tgbot_s *bot, int64_t chat_id, const char *text, const char *parse_mode,
 							tgbot_inlinekeyboard_s *keyboard) {
 	tgbot_option_s options[4] = {
 		{"chat_id", &chat_id, tgbot_opt_int64},
@@ -207,7 +208,7 @@ tgbot_rc tgbot_send_message(tgbot_s *bot, int64_t chat_id, const char *text, con
 																							: TGBOT_SENDMESSAGE_ERROR;
 }
 
-tgbot_rc tgbot_edit_message_text(tgbot_s *bot, int64_t chat_id, long message_id, const char *text,
+tgbot_rc tgbot_edit_message_text(const tgbot_s *bot, int64_t chat_id, long message_id, const char *text,
 								 tgbot_inlinekeyboard_s *keyboard) {
 	tgbot_option_s options[4] = {
 		{"chat_id", &chat_id, tgbot_opt_int64},
@@ -221,7 +222,7 @@ tgbot_rc tgbot_edit_message_text(tgbot_s *bot, int64_t chat_id, long message_id,
 			   : TGBOT_EDITMESSAGETEXT_ERROR;
 }
 
-tgbot_rc tgbot_send_dice(tgbot_s *bot, int64_t chat_id, const char *emoji) {
+tgbot_rc tgbot_send_dice(const tgbot_s *bot, int64_t chat_id, const char *emoji) {
 	tgbot_option_s options[2] = {
 		{"chat_id", &chat_id, tgbot_opt_int64},
 		{"emoji", (void *)emoji, tgbot_opt_string},
