@@ -3,7 +3,8 @@
 #include <stdio.h>
 #include <string.h>
 
-#include <tgbot.h>
+#include <tgbot/methods.h>
+#include <tgbot/tgbot.h>
 
 bool run = true;
 

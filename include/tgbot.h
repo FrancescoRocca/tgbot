@@ -1,9 +1,8 @@
 #ifndef TGBOT_MAIN_H
 #define TGBOT_MAIN_H
 
-#include "common.h"
-#include "methods.h"
 #include "types.h"
+#include <stdint.h>
 
 /**
  * @brief Create a new Bot object.
@@ -21,4 +20,4 @@ tgbot_s *tgbot_new(const char *token);
  */
 void tgbot_free(tgbot_s *bot);
 
-#endif // TGBOT_H
+#endif

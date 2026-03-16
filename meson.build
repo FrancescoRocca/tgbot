@@ -1,8 +1,8 @@
 project(
-  'tgbot',
-  'c',
-  version: '0.1',
-  default_options: ['warning_level=3', 'c_std=c18'],
+    'tgbot',
+    'c',
+    version: '0.1',
+    default_options: ['warning_level=3', 'c_std=c18'],
 )
 
 sources = []
@@ -15,25 +15,36 @@ json_c_dep = dependency('json-c')
 
 deps = [curl_dep, json_c_dep]
 
-install_headers('include/tgbot.h')
+install_headers(
+    [
+        'include/methods.h',
+        'include/tg_types.h',
+        'include/tgbot.h',
+        'include/types.h',
+    ],
+    subdir: 'tgbot',
+)
 
-tgbot_lib = library(
-  'tgbot',
-  sources,
-  dependencies: deps,
-  include_directories: inc_dir,
-  install: true,
+tgbot_lib = static_library(
+    'tgbot',
+    sources,
+    dependencies: deps,
+    include_directories: inc_dir,
+    install: true,
 )
 
 tgbot_dep = declare_dependency(
-  link_with: tgbot_lib,
-  include_directories: inc_dir,
-  dependencies: deps,
+    link_with: tgbot_lib,
+    include_directories: inc_dir,
+    dependencies: deps,
 )
 
 # Example
-executable(
-  'example',
-  'examples/inlinekeyboard/inlinekeyboard.c',
-  dependencies: tgbot_dep,
+example = executable(
+    'example',
+    'examples/inlinekeyboard/inlinekeyboard.c',
+    dependencies: tgbot_dep,
+    build_by_default: false,
 )
+
+test('example_inlinekeyboard', example)

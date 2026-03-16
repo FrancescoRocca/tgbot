@@ -2,11 +2,11 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "common.h"
-#include "json.h"
+#include "internal/common.h"
+#include "internal/json.h"
+#include "internal/parse.h"
 #include "json_object.h"
 #include "methods.h"
-#include "parse.h"
 
 #define opt_size(arr) (sizeof(arr) / sizeof(arr[0]))
 
@@ -33,10 +33,10 @@ static size_t discard_callback(char *ptr, size_t size, size_t nmemb, void *userd
 	return size * nmemb;
 }
 
-static tgbot_rc tgbot_request(const char *url, struct memory_buffer **mb, json_object *json) {
+static int tgbot_request(const char *url, struct memory_buffer **mb, json_object *json) {
 	CURL *curl = curl_easy_init();
 	if (!curl) {
-		return TGBOT_REQUEST_ERROR;
+		return -1;
 	}
 
 	const char *json_string = NULL;
@@ -77,26 +77,26 @@ static tgbot_rc tgbot_request(const char *url, struct memory_buffer **mb, json_o
 			*mb = NULL;
 		}
 
-		return TGBOT_REQUEST_ERROR;
+		return -1;
 	}
 
 	curl_easy_cleanup(curl);
 
-	return TGBOT_OK;
+	return 0;
 }
 
-static tgbot_rc tgbot_execute_method(const tgbot_s *bot, const char *method, tgbot_option_s *options, size_t optlen) {
+static int tgbot_execute_method(const tgbot_s *bot, const char *method, tgbot_option_s *options, size_t optlen) {
 	char url[URL_LEN] = {0};
 	snprintf(url, sizeof(url), "%s%s", bot->api, method);
 
 	json_object *rjson = json_builder(options, optlen);
-	tgbot_rc ret = tgbot_request(url, NULL, rjson);
+	int ret = tgbot_request(url, NULL, rjson);
 	json_object_put(rjson);
 
 	return ret;
 }
 
-tgbot_rc tgbot_get_update(tgbot_s *bot, tgbot_update_s *update, Callback cbq_handler) {
+int tgbot_get_update(tgbot_s *bot, tgbot_update_s *update, Callback cbq_handler) {
 	char url[URL_LEN];
 
 	memset(update, 0, sizeof(tgbot_update_s));
@@ -112,16 +112,16 @@ tgbot_rc tgbot_get_update(tgbot_s *bot, tgbot_update_s *update, Callback cbq_han
 
 	snprintf(url, sizeof(url), "%sgetUpdates", bot->api);
 
-	struct memory_buffer *mb;
-	tgbot_rc ret = tgbot_request(url, &mb, rjson);
+	struct memory_buffer *mb = {0};
+	int ret = tgbot_request(url, &mb, rjson);
 	json_object_put(rjson);
-	if (ret != TGBOT_OK) {
+	if (ret != 0) {
 		if (mb) {
 			free(mb->data);
 			free(mb);
 		}
 
-		return TGBOT_GETUPDATES_ERROR;
+		return -1;
 	}
 
 	json_object *json = json_tokener_parse(mb->data);
@@ -132,7 +132,7 @@ tgbot_rc tgbot_get_update(tgbot_s *bot, tgbot_update_s *update, Callback cbq_han
 	if (!json_object_is_type(ok, json_type_boolean) || !json_object_get_boolean(ok)) {
 		json_object_put(json);
 
-		return TGBOT_TELEGRAM_OK_ERROR;
+		return -1;
 	}
 
 	const json_object *results = json_object_object_get(json, "result");
@@ -141,7 +141,7 @@ tgbot_rc tgbot_get_update(tgbot_s *bot, tgbot_update_s *update, Callback cbq_han
 	if (results_len == 0) {
 		json_object_put(json);
 
-		return TGBOT_OK;
+		return 0;
 	}
 
 	/* Check if it is a Message or a CallbackQuery*/
@@ -156,20 +156,20 @@ tgbot_rc tgbot_get_update(tgbot_s *bot, tgbot_update_s *update, Callback cbq_han
 
 	json_object_put(json);
 
-	return TGBOT_OK;
+	return 0;
 }
 
-tgbot_rc tgbot_get_me(const tgbot_s *bot, tgbot_me_s *me) {
+int tgbot_get_me(const tgbot_s *bot, tgbot_me_s *me) {
 	char url[URL_LEN];
 	snprintf(url, sizeof(url), "%sgetMe", bot->api);
 
 	struct memory_buffer *mb;
-	tgbot_rc ret = tgbot_request(url, &mb, NULL);
-	if (ret != TGBOT_OK) {
+	int ret = tgbot_request(url, &mb, NULL);
+	if (ret != 0) {
 		free(mb->data);
 		free(mb);
 
-		return TGBOT_GETME_ERROR;
+		return -1;
 	}
 
 	json_object *json = json_tokener_parse(mb->data);
@@ -180,7 +180,7 @@ tgbot_rc tgbot_get_me(const tgbot_s *bot, tgbot_me_s *me) {
 	if (!json_object_get_boolean(ok)) {
 		json_object_put(json);
 
-		return TGBOT_GETME_ERROR;
+		return -1;
 	}
 
 	const json_object *result = json_object_object_get(json, "result");
@@ -192,11 +192,11 @@ tgbot_rc tgbot_get_me(const tgbot_s *bot, tgbot_me_s *me) {
 
 	json_object_put(json);
 
-	return TGBOT_OK;
+	return 0;
 }
 
-tgbot_rc tgbot_send_message(const tgbot_s *bot, int64_t chat_id, const char *text, const char *parse_mode,
-							tgbot_inlinekeyboard_s *keyboard) {
+int tgbot_send_message(const tgbot_s *bot, int64_t chat_id, const char *text, const char *parse_mode,
+					   tgbot_inlinekeyboard_s *keyboard) {
 	tgbot_option_s options[4] = {
 		{"chat_id", &chat_id, tgbot_opt_int64},
 		{"text", (void *)text, tgbot_opt_string},
@@ -204,12 +204,11 @@ tgbot_rc tgbot_send_message(const tgbot_s *bot, int64_t chat_id, const char *tex
 		{"reply_markup", keyboard, tgbot_opt_inlinekeyboard},
 	};
 
-	return tgbot_execute_method(bot, "sendMessage", options, opt_size(options)) == TGBOT_OK ? TGBOT_OK
-																							: TGBOT_SENDMESSAGE_ERROR;
+	return tgbot_execute_method(bot, "sendMessage", options, opt_size(options));
 }
 
-tgbot_rc tgbot_edit_message_text(const tgbot_s *bot, int64_t chat_id, long message_id, const char *text,
-								 tgbot_inlinekeyboard_s *keyboard) {
+int tgbot_edit_message_text(const tgbot_s *bot, int64_t chat_id, long message_id, const char *text,
+							tgbot_inlinekeyboard_s *keyboard) {
 	tgbot_option_s options[4] = {
 		{"chat_id", &chat_id, tgbot_opt_int64},
 		{"message_id", &message_id, tgbot_opt_int},
@@ -217,17 +216,14 @@ tgbot_rc tgbot_edit_message_text(const tgbot_s *bot, int64_t chat_id, long messa
 		{"reply_markup", keyboard, tgbot_opt_inlinekeyboard},
 	};
 
-	return tgbot_execute_method(bot, "editMessageText", options, opt_size(options)) == TGBOT_OK
-			   ? TGBOT_OK
-			   : TGBOT_EDITMESSAGETEXT_ERROR;
+	return tgbot_execute_method(bot, "editMessageText", options, opt_size(options));
 }
 
-tgbot_rc tgbot_send_dice(const tgbot_s *bot, int64_t chat_id, const char *emoji) {
+int tgbot_send_dice(const tgbot_s *bot, int64_t chat_id, const char *emoji) {
 	tgbot_option_s options[2] = {
 		{"chat_id", &chat_id, tgbot_opt_int64},
 		{"emoji", (void *)emoji, tgbot_opt_string},
 	};
 
-	return tgbot_execute_method(bot, "sendDice", options, opt_size(options)) == TGBOT_OK ? TGBOT_OK
-																						 : TGBOT_SENDDICE_ERROR;
+	return tgbot_execute_method(bot, "sendDice", options, opt_size(options));
 }

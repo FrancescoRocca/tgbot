@@ -1,7 +1,9 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "json.h"
+#include "internal/common.h"
+#include "internal/json.h"
+#include "tg_types.h"
 
 json_object *json_builder(tgbot_option_s *options, size_t optionslen) {
 	json_object *rjson = json_object_new_object();

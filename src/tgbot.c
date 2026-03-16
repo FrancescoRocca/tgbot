@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "internal/common.h"
 #include "tgbot.h"
 
 tgbot_s *tgbot_new(const char *token) {

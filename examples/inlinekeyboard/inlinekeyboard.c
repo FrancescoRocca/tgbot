@@ -4,7 +4,9 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include <tgbot.h>
+#include <tgbot/methods.h>
+#include <tgbot/tg_types.h>
+#include <tgbot/tgbot.h>
 
 #define WELCOME_MSG "Hi there! This bot is coded in C."
 
@@ -40,12 +42,12 @@ void sighandler(int signum) {
 }
 
 void parse_command(const tgbot_s *bot, const tgbot_update_s *update) {
-	tgbot_rc ret;
+	int ret;
 
 	if (strcmp("/start", update->text) == 0) {
 		ret = tgbot_send_message(bot, update->chat_id, WELCOME_MSG, "Markdown", keyboard);
 
-		if (ret != TGBOT_OK) {
+		if (ret != 0) {
 			fprintf(stderr, "Failed to send message\n");
 		}
 
@@ -54,7 +56,7 @@ void parse_command(const tgbot_s *bot, const tgbot_update_s *update) {
 
 	/* Echo the message */
 	ret = tgbot_send_message(bot, update->chat_id, update->text, "Markdown", NULL);
-	if (ret != TGBOT_OK) {
+	if (ret != 0) {
 		fprintf(stderr, "Failed to send message\n");
 	}
 }
@@ -100,8 +102,8 @@ int main(void) {
 
 	/* Main loop */
 	while (run) {
-		tgbot_rc ret = tgbot_get_update(bot, &update, callback_handler);
-		if (ret != TGBOT_OK) {
+		int ret = tgbot_get_update(bot, &update, callback_handler);
+		if (ret != 0) {
 			fprintf(stderr, "tgbot_get_updates()\n");
 			continue;
 		}

@@ -1,6 +1,7 @@
-#include "parse.h"
+#include "internal/parse.h"
+#include "internal/common.h"
 
-tgbot_rc tgbot_parse_message(tgbot_s *bot, tgbot_update_s *update, json_object *result) {
+int tgbot_parse_message(tgbot_s *bot, tgbot_update_s *update, json_object *result) {
 	json_object *update_id = json_object_object_get(result, "update_id");
 	bot->offset = json_object_get_int(update_id) + 1;
 	update->update_id = json_object_get_int(update_id);
@@ -48,10 +49,10 @@ tgbot_rc tgbot_parse_message(tgbot_s *bot, tgbot_update_s *update, json_object *
 		snprintf(update->text, sizeof(update->text), "%s", json_object_get_string(text));
 	}
 
-	return TGBOT_OK;
+	return 0;
 }
 
-tgbot_rc tgbot_parse_cbquery(tgbot_s *bot, tgbot_cbquery_s *query, json_object *result, Callback cbq_handler) {
+int tgbot_parse_cbquery(tgbot_s *bot, tgbot_cbquery_s *query, json_object *result, Callback cbq_handler) {
 	json_object *update_id = json_object_object_get(result, "update_id");
 	bot->offset = json_object_get_int(update_id) + 1;
 	query->update_id = json_object_get_int(update_id);
@@ -96,5 +97,5 @@ tgbot_rc tgbot_parse_cbquery(tgbot_s *bot, tgbot_cbquery_s *query, json_object *
 
 	cbq_handler(bot, query);
 
-	return TGBOT_OK;
+	return 0;
 }
