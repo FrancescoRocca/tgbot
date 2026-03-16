@@ -39,6 +39,24 @@ tgbot_dep = declare_dependency(
     dependencies: deps,
 )
 
+cppcheck = find_program('cppcheck', required: false)
+
+if cppcheck.found()
+    run_target(
+        'cppcheck',
+        command: [
+            cppcheck,
+            '--enable=all',
+            '--inconclusive',
+            '--std=c18',
+            '--check-level=exhaustive',
+            '--suppress=missingIncludeSystem',
+            '--project='
+            + join_paths(meson.current_build_dir(), 'compile_commands.json'),
+        ],
+    )
+endif
+
 # Example
 example = executable(
     'example',
