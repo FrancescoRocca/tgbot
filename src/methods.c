@@ -10,7 +10,7 @@
 
 #define opt_size(arr) (sizeof(arr) / sizeof(arr[0]))
 
-static size_t write_callback(void *ptr, size_t size, size_t nmemb, char *userdata) {
+static size_t write_callback(const void *ptr, size_t size, size_t nmemb, char *userdata) {
 	size_t real_size = size * nmemb;
 	struct memory_buffer *mem = (struct memory_buffer *)userdata;
 
@@ -53,8 +53,12 @@ static int tgbot_request(const char *url, struct memory_buffer **mb, json_object
 		curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, (curl_write_callback)write_callback);
 		curl_easy_setopt(curl, CURLOPT_WRITEDATA, *mb);
 	} else {
+		struct memory_buffer *mb_f = malloc(sizeof *mb_f);
 		curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, discard_callback);
-		curl_easy_setopt(curl, CURLOPT_WRITEDATA, NULL);
+		curl_easy_setopt(curl, CURLOPT_WRITEDATA, mb_f);
+		if (mb_f) {
+			free(mb_f);
+		}
 	}
 
 	curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 1L);
@@ -163,11 +167,13 @@ int tgbot_get_me(const tgbot_s *bot, tgbot_me_s *me) {
 	char url[URL_LEN];
 	snprintf(url, sizeof(url), "%sgetMe", bot->api);
 
-	struct memory_buffer *mb;
+	struct memory_buffer *mb = {0};
 	int ret = tgbot_request(url, &mb, NULL);
 	if (ret != 0) {
-		free(mb->data);
-		free(mb);
+		if (mb) {
+			free(mb->data);
+			free(mb);
+		}
 
 		return -1;
 	}
@@ -196,12 +202,12 @@ int tgbot_get_me(const tgbot_s *bot, tgbot_me_s *me) {
 }
 
 int tgbot_send_message(const tgbot_s *bot, int64_t chat_id, const char *text, const char *parse_mode,
-					   tgbot_inlinekeyboard_s *keyboard) {
+					   tgbot_inlinekeyboard_s *reply_markup) {
 	tgbot_option_s options[4] = {
 		{"chat_id", &chat_id, tgbot_opt_int64},
 		{"text", (void *)text, tgbot_opt_string},
 		{"parse_mode", (void *)parse_mode, tgbot_opt_string},
-		{"reply_markup", keyboard, tgbot_opt_inlinekeyboard},
+		{"reply_markup", reply_markup, tgbot_opt_inlinekeyboard},
 	};
 
 	return tgbot_execute_method(bot, "sendMessage", options, opt_size(options));

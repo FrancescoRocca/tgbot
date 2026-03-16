@@ -2,7 +2,6 @@
 #define TGBOT_METHODS_H
 
 #include "types.h"
-#include <json-c/json.h>
 
 /* Retrieve update */
 int tgbot_get_update(tgbot_s *bot, tgbot_update_s *update, Callback cbq_handler);
