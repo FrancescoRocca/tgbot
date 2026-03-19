@@ -58,11 +58,9 @@ if cppcheck.found()
 endif
 
 # Example
-example = executable(
+executable(
     'example',
-    'examples/inlinekeyboard/inlinekeyboard.c',
+    'examples/sender/sendpic.c',
     dependencies: tgbot_dep,
     build_by_default: false,
 )
-
-test('example_inlinekeyboard', example)

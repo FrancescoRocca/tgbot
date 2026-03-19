@@ -1,6 +1,6 @@
 # tgbot
 
-A minimal C Telegram API Framework.
+A minimal C Telegram API library.
 
 ## Requirements
 
@@ -46,7 +46,7 @@ You can find some examples [here](./examples/).
 ### Supported Types
 
 - **InlineKeyboardMarkup**
-  - Note: Standard `KeyboardMarkup` is intentionally not supported.
+    - Note: Standard `KeyboardMarkup` is intentionally not supported.
 
 #### Supported Methods
 
@@ -54,10 +54,10 @@ You can find some examples [here](./examples/).
 - `sendMessage`
 - `editMessageText`
 - `sendDice`
+- `sendPhoto`
 
 ## Roadmap
 
-- `sendPhoto`
 - `sendAudio`
 - `sendDocument`
 - `sendVideo`

@@ -10,7 +10,7 @@
 
 #define opt_size(arr) (sizeof(arr) / sizeof(arr[0]))
 
-static size_t write_callback(const void *ptr, size_t size, size_t nmemb, char *userdata) {
+static size_t write_callback(void *ptr, size_t size, size_t nmemb, char *userdata) {
 	size_t real_size = size * nmemb;
 	struct memory_buffer *mem = (struct memory_buffer *)userdata;
 
@@ -53,16 +53,12 @@ static int tgbot_request(const char *url, struct memory_buffer **mb, json_object
 		curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, (curl_write_callback)write_callback);
 		curl_easy_setopt(curl, CURLOPT_WRITEDATA, *mb);
 	} else {
-		struct memory_buffer *mb_f = malloc(sizeof *mb_f);
 		curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, discard_callback);
-		curl_easy_setopt(curl, CURLOPT_WRITEDATA, mb_f);
-		if (mb_f) {
-			free(mb_f);
-		}
+		curl_easy_setopt(curl, CURLOPT_WRITEDATA, NULL);
 	}
 
 	curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 1L);
-	curl_easy_setopt(curl, CURLOPT_TCP_KEEPALIVE, 30L);
+	curl_easy_setopt(curl, CURLOPT_TCP_KEEPALIVE, 1L);
 
 	if (json != NULL) {
 		json_string = json_object_to_json_string_ext(json, JSON_C_TO_STRING_PLAIN);
@@ -98,6 +94,60 @@ static int tgbot_execute_method(const tgbot_s *bot, const char *method, tgbot_op
 	json_object_put(rjson);
 
 	return ret;
+}
+
+static int tgbot_execute_method_multipart(const tgbot_s *bot, const char *method, int64_t chat_id, const char *path,
+										  const char *caption) {
+	CURL *curl = curl_easy_init();
+	if (!curl) {
+		return -1;
+	}
+
+	char url[URL_LEN] = {0};
+	int chars = snprintf(url, sizeof(url), "%s%s", bot->api, method);
+	if (chars < 0 || (size_t)chars >= sizeof(url)) {
+		curl_easy_cleanup(curl);
+		return -1;
+	}
+
+	curl_mime *mime = curl_mime_init(curl);
+	curl_mimepart *part;
+
+	char chat_id_str[512];
+	snprintf(chat_id_str, sizeof chat_id_str, "%ld", chat_id);
+
+	part = curl_mime_addpart(mime);
+	curl_mime_data(part, chat_id_str, CURL_ZERO_TERMINATED);
+	curl_mime_name(part, "chat_id");
+
+	part = curl_mime_addpart(mime);
+	curl_mime_filedata(part, path);
+	curl_mime_name(part, "photo");
+
+	part = curl_mime_addpart(mime);
+	curl_mime_data(part, caption, CURL_ZERO_TERMINATED);
+	curl_mime_name(part, "caption");
+
+	curl_easy_setopt(curl, CURLOPT_URL, url);
+	curl_easy_setopt(curl, CURLOPT_MIMEPOST, mime);
+
+	/* Do not print response to output */
+	curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, discard_callback);
+	curl_easy_setopt(curl, CURLOPT_WRITEDATA, NULL);
+
+	CURLcode res = curl_easy_perform(curl);
+	if (res != CURLE_OK) {
+		fprintf(stderr, "curl_easy_perform: %s\n", curl_easy_strerror(res));
+		curl_easy_cleanup(curl);
+		curl_mime_free(mime);
+
+		return -1;
+	}
+
+	curl_easy_cleanup(curl);
+	curl_mime_free(mime);
+
+	return 0;
 }
 
 int tgbot_get_update(tgbot_s *bot, tgbot_update_s *update, Callback cbq_handler) {
@@ -191,10 +241,14 @@ int tgbot_get_me(const tgbot_s *bot, tgbot_me_s *me) {
 
 	const json_object *result = json_object_object_get(json, "result");
 	json_object *first_name = json_object_object_get(result, "first_name");
-	snprintf(me->first_name, sizeof(me->first_name), "%s", json_object_get_string(first_name));
+	if (first_name) {
+		snprintf(me->first_name, sizeof(me->first_name), "%s", json_object_get_string(first_name));
+	}
 
 	json_object *username = json_object_object_get(result, "username");
-	snprintf(me->username, sizeof(me->username), "%s", json_object_get_string(username));
+	if (username) {
+		snprintf(me->username, sizeof(me->username), "%s", json_object_get_string(username));
+	}
 
 	json_object_put(json);
 
@@ -232,4 +286,8 @@ int tgbot_send_dice(const tgbot_s *bot, int64_t chat_id, const char *emoji) {
 	};
 
 	return tgbot_execute_method(bot, "sendDice", options, opt_size(options));
+}
+
+int tgbot_send_photo(const tgbot_s *bot, int64_t chat_id, const char *path, const char *caption) {
+	return tgbot_execute_method_multipart(bot, "sendPhoto", chat_id, path, caption);
 }
