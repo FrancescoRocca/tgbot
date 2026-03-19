@@ -15,6 +15,8 @@ tgbot_s *tgbot_new(const char *token);
 
 /**
  * @brief Cleans the memory.
+ * Note: If you're using curl it will call curl_global_cleanup().
+ * Maybe I'll change the API.
  *
  * @param[out] bot The Bot object.
  */
