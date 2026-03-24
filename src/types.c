@@ -29,6 +29,10 @@ void tgbot_inlinekb_free(tgbot_inlinekeyboard_s *keyboard) {
 }
 
 tgbot_inlinekeyboardbutton_s *tgbot_inlinekb_button_at(tgbot_inlinekeyboard_s *keyboard, size_t row, size_t column) {
+	if (row >= keyboard->rows || column >= keyboard->columns) {
+		return NULL;
+	}
+
 	return &keyboard->buttons[row * keyboard->columns + column];
 }
 

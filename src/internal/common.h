@@ -23,7 +23,7 @@ struct memory_buffer {
 typedef struct tgbot {
 	char token[TOKEN_SIZE]; /**< Bot token. */
 	char api[API_SIZE];		/**< Bot API url. */
-	int32_t offset;			/**< Bot offset. */
+	int64_t offset;			/**< Bot offset. */
 } tgbot_s;
 
 enum tgbot_opt_type {
