@@ -40,7 +40,6 @@ tgbot_dep = declare_dependency(
 )
 
 cppcheck = find_program('cppcheck', required: false)
-
 if cppcheck.found()
     run_target(
         'cppcheck',
@@ -55,6 +54,11 @@ if cppcheck.found()
             + join_paths(meson.current_build_dir(), 'compile_commands.json'),
         ],
     )
+endif
+
+clangformat = find_program('clang-format', required: false)
+if clangformat.found()
+    run_target('format', command: [clangformat, '-i', sources])
 endif
 
 # Example
