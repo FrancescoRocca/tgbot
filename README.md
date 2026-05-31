@@ -24,16 +24,11 @@ You can find some examples [here](./examples/).
 
 ### Supported Types
 
-- **InlineKeyboardMarkup**
-  - Note: Standard `KeyboardMarkup` is intentionally not supported.
+See [types.md](./docs/types.md).
 
 #### Supported Methods
 
-- `getMe`
-- `sendMessage`
-- `editMessageText`
-- `sendDice`
-- `sendPhoto`
+See [methods.md](./docs/methods.md).
 
 ## Roadmap
 
