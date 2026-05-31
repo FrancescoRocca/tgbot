@@ -3,7 +3,7 @@
 
 #include "internal/common.h"
 #include "internal/json.h"
-#include <tgbot/tg_types.h>
+#include <tgbot/types.h>
 
 json_object *json_builder(tgbot_option_s *options, size_t optionslen) {
 	if (!options && optionslen > 0) {

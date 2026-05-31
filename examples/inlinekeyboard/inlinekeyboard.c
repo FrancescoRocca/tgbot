@@ -5,7 +5,7 @@
 #include <string.h>
 
 #include <tgbot/methods.h>
-#include <tgbot/tg_types.h>
+#include <tgbot/types.h>
 #include <tgbot/tgbot.h>
 
 #define WELCOME_MSG "Hi there! This bot is coded in C."
