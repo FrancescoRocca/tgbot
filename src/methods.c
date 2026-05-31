@@ -6,7 +6,7 @@
 #include "internal/json.h"
 #include "internal/parse.h"
 #include "json_object.h"
-#include "methods.h"
+#include <tgbot/methods.h>
 
 #define opt_size(arr) (sizeof(arr) / sizeof(arr[0]))
 

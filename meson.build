@@ -6,7 +6,9 @@ project(
 )
 
 sources = []
+headers = []
 subdir('src')
+subdir('include')
 
 inc_dir = include_directories('include')
 
@@ -16,12 +18,7 @@ json_c_dep = dependency('json-c')
 deps = [curl_dep, json_c_dep]
 
 install_headers(
-    [
-        'include/methods.h',
-        'include/tg_types.h',
-        'include/tgbot.h',
-        'include/types.h',
-    ],
+    headers,
     subdir: 'tgbot',
 )
 
@@ -31,12 +28,6 @@ tgbot_lib = static_library(
     dependencies: deps,
     include_directories: inc_dir,
     install: true,
-)
-
-tgbot_dep = declare_dependency(
-    link_with: tgbot_lib,
-    include_directories: inc_dir,
-    dependencies: deps,
 )
 
 cppcheck = find_program('cppcheck', required: false)
@@ -58,13 +49,14 @@ endif
 
 clangformat = find_program('clang-format', required: false)
 if clangformat.found()
-    run_target('format', command: [clangformat, '-i', sources])
+    run_target('format', command: [clangformat, '-i'] + sources + headers)
 endif
 
 # Example
 executable(
     'example',
     'examples/sender/sendpic.c',
-    dependencies: tgbot_dep,
     build_by_default: false,
+    link_with: tgbot_lib,
+    include_directories: inc_dir,
 )

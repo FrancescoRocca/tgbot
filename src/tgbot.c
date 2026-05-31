@@ -5,7 +5,7 @@
 #include <stdlib.h>
 
 #include "internal/common.h"
-#include "tgbot.h"
+#include <tgbot/tgbot.h>
 
 tgbot_s *tgbot_new(const char *token) {
 	if (!token || token[0] == '\0') {

@@ -1,9 +1,9 @@
 #ifndef TGBOT_INTERNAL_COMMON_H
 #define TGBOT_INTERNAL_COMMON_H
 
-#include "types.h"
 #include <curl/curl.h>
 #include <stdint.h>
+#include <tgbot/types.h>
 
 #define TOKEN_SIZE 128
 #define API_SIZE 512

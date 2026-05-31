@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "types.h"
+#include <tgbot/types.h>
 
 tgbot_inlinekeyboard_s *tgbot_inlinekb_new(size_t rows, size_t columns) {
 	if (rows == 0 || columns == 0 || rows > SIZE_MAX / columns) {
