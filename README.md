@@ -11,33 +11,12 @@ A minimal C Telegram API library.
 
 ## How to build
 
-<details>
-
-<summary>Linux</summary>
-
 ```bash
 $ meson setup build
 $ cd build
 $ meson compile
-$ meson install
+$ ninja install
 ```
-
-</details>
-
-<details>
-
-<summary>Windows</summary>
-
-Install all the required library with `vcpkg` and then copy the DLL file.
-
-```powershell
-$ meson setup build --native-file meson-vcpkg.txt
-$ cd build
-$ meson compile
-$ meson install
-```
-
-</details>
 
 ## Examples
 
@@ -46,7 +25,7 @@ You can find some examples [here](./examples/).
 ### Supported Types
 
 - **InlineKeyboardMarkup**
-    - Note: Standard `KeyboardMarkup` is intentionally not supported.
+  - Note: Standard `KeyboardMarkup` is intentionally not supported.
 
 #### Supported Methods
 
