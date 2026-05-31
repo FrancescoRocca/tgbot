@@ -26,12 +26,25 @@ int main(void) {
 
 	tgbot_update_s update;
 	while (1) {
-		tgbot_get_update(bot, &update, NULL);
+		if (tgbot_get_update(bot, &update, NULL) != 0) {
+			continue;
+		}
 
 		if (!strcmp(update.text, "/start")) {
-			tgbot_send_message(bot, update.chat_id, START_MESSAGE, "MARKDOWN", NULL);
+			tgbot_message message = {
+				.chat_id = update.chat_id,
+				.text = START_MESSAGE,
+				.parse_mode = "MARKDOWN",
+				.reply_markup = NULL,
+			};
+			tgbot_send_message(bot, &message);
 		} else if (!strcmp(update.text, "/photo")) {
-			tgbot_send_photo(bot, update.chat_id, PHOTO_PATH, "Mountains!");
+			tgbot_photo photo = {
+				.chat_id = update.chat_id,
+				.path = PHOTO_PATH,
+				.caption = "Mountains!",
+			};
+			tgbot_send_photo(bot, &photo);
 		}
 	}
 

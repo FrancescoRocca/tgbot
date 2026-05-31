@@ -5,8 +5,8 @@
 #include <string.h>
 
 #include <tgbot/methods.h>
-#include <tgbot/types.h>
 #include <tgbot/tgbot.h>
+#include <tgbot/types.h>
 
 #define WELCOME_MSG "Hi there! This bot is coded in C."
 
@@ -24,12 +24,26 @@ void callback_handler(tgbot_s *bot, tgbot_cbquery_s *query) {
 		tgbot_inlinekeyboard_s *home_keyboard = tgbot_inlinekb_new(1, 1);
 		/* Add buttons */
 		tgbot_inlinekb_button(home_keyboard, 0, 0, "Home", "", "home");
-		tgbot_edit_message_text(bot, query->chat_id, query->message_id, "Callback called!", home_keyboard);
+
+		tgbot_message edit = {
+			.chat_id = query->chat_id,
+			.message_id = query->message_id,
+			.text = "Callback called!",
+			.reply_markup = home_keyboard,
+		};
+		tgbot_edit_message_text(bot, &edit);
+
 		tgbot_inlinekb_free(home_keyboard);
 
 		return;
 	} else if (strcmp("home", query->data) == 0) {
-		tgbot_edit_message_text(bot, query->chat_id, query->message_id, WELCOME_MSG, keyboard);
+		tgbot_message edit = {
+			.chat_id = query->chat_id,
+			.message_id = query->message_id,
+			.text = WELCOME_MSG,
+			.reply_markup = keyboard,
+		};
+		tgbot_edit_message_text(bot, &edit);
 
 		return;
 	}
@@ -45,7 +59,13 @@ void parse_command(const tgbot_s *bot, const tgbot_update_s *update) {
 	int ret;
 
 	if (strcmp("/start", update->text) == 0) {
-		ret = tgbot_send_message(bot, update->chat_id, WELCOME_MSG, "Markdown", keyboard);
+		tgbot_message message = {
+			.chat_id = update->chat_id,
+			.text = WELCOME_MSG,
+			.parse_mode = "MARKDOWN",
+			.reply_markup = keyboard,
+		};
+		ret = tgbot_send_message(bot, &message);
 
 		if (ret != 0) {
 			fprintf(stderr, "Failed to send message\n");
@@ -55,7 +75,13 @@ void parse_command(const tgbot_s *bot, const tgbot_update_s *update) {
 	}
 
 	/* Echo the message */
-	ret = tgbot_send_message(bot, update->chat_id, update->text, "Markdown", NULL);
+	tgbot_message echo = {
+		.chat_id = update->chat_id,
+		.text = update->text,
+		.parse_mode = "MARKDOWN",
+		.reply_markup = NULL,
+	};
+	ret = tgbot_send_message(bot, &echo);
 	if (ret != 0) {
 		fprintf(stderr, "Failed to send message\n");
 	}
@@ -104,7 +130,6 @@ int main(void) {
 	while (run) {
 		int ret = tgbot_get_update(bot, &update, callback_handler);
 		if (ret != 0) {
-			fprintf(stderr, "tgbot_get_updates()\n");
 			continue;
 		}
 

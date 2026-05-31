@@ -11,6 +11,10 @@
 #define CHAT_TYPE_SIZE 32
 #define CHAT_TEXT_SIZE 4096
 
+#define TEXT_SIZE 200
+#define URL_SIZE 200
+#define CB_DATA_SIZE 64
+
 /**
  * @brief Telegram bot struct.
  */
@@ -29,7 +33,7 @@ typedef struct tgbot_me {
  */
 typedef struct tgbot_update {
 	int64_t update_id;						 /**< Update id. */
-	long message_id;						 /**< Message id. */
+	int64_t message_id;						 /**< Message id. */
 	int64_t chat_id;						 /**< Chat id. */
 	char chat_first_name[FIRSTNAME_SIZE];	 /**< Chat first name. */
 	char chat_last_name[CHAT_LASTNAME_SIZE]; /**< Chat last name. */
@@ -44,7 +48,7 @@ typedef struct tgbot_update {
  */
 typedef struct tgbot_cbquery {
 	int64_t update_id;
-	long message_id;
+	int64_t message_id;
 	int64_t chat_id;
 	char chat_username[USERNAME_SIZE];
 	int32_t date;
@@ -57,10 +61,6 @@ typedef struct tgbot_cbquery {
  * @brief Callback function pointer.
  */
 typedef void (*Callback)(tgbot_s *bot, tgbot_cbquery_s *query);
-
-#define TEXT_SIZE 200
-#define URL_SIZE 200
-#define CB_DATA_SIZE 64
 
 /**
  * @brief Represents a single button on an inline keyboard.
@@ -79,6 +79,34 @@ typedef struct tgbot_inlinekeyboard {
 	size_t columns;						   /**< Number of columns per row. */
 	tgbot_inlinekeyboardbutton_s *buttons; /**< Array of buttons. */
 } tgbot_inlinekeyboard_s;
+
+/**
+ * @brief Message struct.
+ */
+typedef struct tgbot_message {
+	int64_t chat_id;
+	int64_t message_id;
+	const char *text;
+	const char *parse_mode;
+	tgbot_inlinekeyboard_s *reply_markup;
+} tgbot_message;
+
+/**
+ * @brief Dice struct.
+ */
+typedef struct tgbot_dice {
+	int64_t chat_id;
+	const char *emoji;
+} tgbot_dice;
+
+/**
+ * @brief Photo struct.
+ */
+typedef struct tgbot_photo {
+	int64_t chat_id;
+	const char *path;
+	const char *caption;
+} tgbot_photo;
 
 /**
  * @brief Allocates a new inline keyboard.

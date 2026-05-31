@@ -166,15 +166,10 @@ int tgbot_get_update(tgbot_s *bot, tgbot_update_s *update, Callback cbq_handler)
 
 	snprintf(url, sizeof(url), "%sgetUpdates", bot->api);
 
-	struct memory_buffer *mb = {0};
+	struct memory_buffer *mb = NULL;
 	int ret = tgbot_request(url, &mb, rjson);
 	json_object_put(rjson);
 	if (ret != 0) {
-		if (mb) {
-			free(mb->data);
-			free(mb);
-		}
-
 		return -1;
 	}
 
@@ -182,14 +177,24 @@ int tgbot_get_update(tgbot_s *bot, tgbot_update_s *update, Callback cbq_handler)
 	free(mb->data);
 	free(mb);
 
+	if (!json) {
+		return -1;
+	}
+
 	const json_object *ok = json_object_object_get(json, "ok");
-	if (!json_object_is_type(ok, json_type_boolean) || !json_object_get_boolean(ok)) {
+	if (!ok || !json_object_is_type(ok, json_type_boolean) || !json_object_get_boolean(ok)) {
 		json_object_put(json);
 
 		return -1;
 	}
 
 	const json_object *results = json_object_object_get(json, "result");
+	if (!results || !json_object_is_type(results, json_type_array)) {
+		json_object_put(json);
+
+		return -1;
+	}
+
 	size_t results_len = json_object_array_length(results);
 
 	if (results_len == 0) {
@@ -217,14 +222,9 @@ int tgbot_get_me(const tgbot_s *bot, tgbot_me_s *me) {
 	char url[URL_LEN];
 	snprintf(url, sizeof(url), "%sgetMe", bot->api);
 
-	struct memory_buffer *mb = {0};
+	struct memory_buffer *mb = NULL;
 	int ret = tgbot_request(url, &mb, NULL);
 	if (ret != 0) {
-		if (mb) {
-			free(mb->data);
-			free(mb);
-		}
-
 		return -1;
 	}
 
@@ -232,14 +232,24 @@ int tgbot_get_me(const tgbot_s *bot, tgbot_me_s *me) {
 	free(mb->data);
 	free(mb);
 
+	if (!json) {
+		return -1;
+	}
+
 	const json_object *ok = json_object_object_get(json, "ok");
-	if (!json_object_get_boolean(ok)) {
+	if (!ok || !json_object_is_type(ok, json_type_boolean) || !json_object_get_boolean(ok)) {
 		json_object_put(json);
 
 		return -1;
 	}
 
 	const json_object *result = json_object_object_get(json, "result");
+	if (!result) {
+		json_object_put(json);
+
+		return -1;
+	}
+
 	json_object *first_name = json_object_object_get(result, "first_name");
 	if (first_name) {
 		snprintf(me->first_name, sizeof(me->first_name), "%s", json_object_get_string(first_name));
@@ -255,39 +265,53 @@ int tgbot_get_me(const tgbot_s *bot, tgbot_me_s *me) {
 	return 0;
 }
 
-int tgbot_send_message(const tgbot_s *bot, int64_t chat_id, const char *text, const char *parse_mode,
-					   tgbot_inlinekeyboard_s *reply_markup) {
+int tgbot_send_message(const tgbot_s *bot, tgbot_message *message) {
+	if (!message) {
+		return -1;
+	}
+
 	tgbot_option_s options[4] = {
-		{"chat_id", &chat_id, tgbot_opt_int64},
-		{"text", (void *)text, tgbot_opt_string},
-		{"parse_mode", (void *)parse_mode, tgbot_opt_string},
-		{"reply_markup", reply_markup, tgbot_opt_inlinekeyboard},
+		{"chat_id", &message->chat_id, tgbot_opt_int64},
+		{"text", (void *)message->text, tgbot_opt_string},
+		{"parse_mode", (void *)message->parse_mode, tgbot_opt_string},
+		{"reply_markup", (void *)message->reply_markup, tgbot_opt_inlinekeyboard},
 	};
 
 	return tgbot_execute_method(bot, "sendMessage", options, opt_size(options));
 }
 
-int tgbot_edit_message_text(const tgbot_s *bot, int64_t chat_id, long message_id, const char *text,
-							tgbot_inlinekeyboard_s *keyboard) {
+int tgbot_edit_message_text(const tgbot_s *bot, tgbot_message *message) {
+	if (!message) {
+		return -1;
+	}
+
 	tgbot_option_s options[4] = {
-		{"chat_id", &chat_id, tgbot_opt_int64},
-		{"message_id", &message_id, tgbot_opt_int},
-		{"text", (void *)text, tgbot_opt_string},
-		{"reply_markup", keyboard, tgbot_opt_inlinekeyboard},
+		{"chat_id", &message->chat_id, tgbot_opt_int64},
+		{"message_id", &message->message_id, tgbot_opt_int},
+		{"text", (void *)message->text, tgbot_opt_string},
+		{"reply_markup", message->reply_markup, tgbot_opt_inlinekeyboard},
 	};
 
 	return tgbot_execute_method(bot, "editMessageText", options, opt_size(options));
 }
 
-int tgbot_send_dice(const tgbot_s *bot, int64_t chat_id, const char *emoji) {
+int tgbot_send_dice(const tgbot_s *bot, tgbot_dice *dice) {
+	if (!dice) {
+		return -1;
+	}
+
 	tgbot_option_s options[2] = {
-		{"chat_id", &chat_id, tgbot_opt_int64},
-		{"emoji", (void *)emoji, tgbot_opt_string},
+		{"chat_id", &dice->chat_id, tgbot_opt_int64},
+		{"emoji", (void *)dice->emoji, tgbot_opt_string},
 	};
 
 	return tgbot_execute_method(bot, "sendDice", options, opt_size(options));
 }
 
-int tgbot_send_photo(const tgbot_s *bot, int64_t chat_id, const char *path, const char *caption) {
-	return tgbot_execute_method_multipart(bot, "sendPhoto", chat_id, path, caption);
+int tgbot_send_photo(const tgbot_s *bot, tgbot_photo *photo) {
+	if (!photo) {
+		return -1;
+	}
+
+	return tgbot_execute_method_multipart(bot, "sendPhoto", photo->chat_id, photo->path, photo->caption);
 }
