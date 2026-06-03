@@ -22,6 +22,15 @@ $ ninja install
 
 You can find some examples [here](./examples/).
 
+Do you want to run an example?
+
+```bash
+$ cd build
+$ ninja <EXAMPLE>
+# to build the echobot:
+$ ninja echobot
+```
+
 ### Supported Types
 
 See [types.md](./docs/types.md).

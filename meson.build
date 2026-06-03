@@ -52,9 +52,25 @@ if clangformat.found()
     run_target('format', command: [clangformat, '-i'] + sources + headers)
 endif
 
-# Example
+# Examples
 executable(
-    'example',
+    'echobot',
+    'examples/echobot/echobot.c',
+    build_by_default: false,
+    link_with: tgbot_lib,
+    include_directories: inc_dir,
+)
+
+executable(
+    'inlinekeyboard',
+    'examples/inlinekeyboard/inlinekeyboard.c',
+    build_by_default: false,
+    link_with: tgbot_lib,
+    include_directories: inc_dir,
+)
+
+executable(
+    'sendpic',
     'examples/sender/sendpic.c',
     build_by_default: false,
     link_with: tgbot_lib,
