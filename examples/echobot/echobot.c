@@ -33,7 +33,7 @@ int main(void) {
 	}
 
 	char token[256];
-	fscanf(fp, "%s", token);
+	fscanf(fp, "%255s", token);
 	fprintf(stdout, "Token: %s\n", token);
 	fclose(fp);
 

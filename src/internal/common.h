@@ -21,13 +21,12 @@ struct memory_buffer {
  * @brief A structure to represent bot object.
  */
 typedef struct tgbot {
-	char token[TOKEN_SIZE]; /**< Bot token. */
-	char api[API_SIZE];		/**< Bot API url. */
-	int64_t offset;			/**< Bot offset. */
+	char api[API_SIZE]; /**< Bot API url. */
+	int64_t offset;		/**< Bot offset. */
 } tgbot_s;
 
 enum tgbot_opt_type {
-	tgbot_opt_int,
+	tgbot_opt_int32,
 	tgbot_opt_int64,
 	tgbot_opt_string,
 	tgbot_opt_inlinekeyboard,

@@ -17,7 +17,7 @@ json_object *json_builder(tgbot_option_s *options, size_t optionslen) {
 
 	for (size_t i = 0; i < optionslen; ++i) {
 		switch (options[i].type) {
-			case tgbot_opt_int: {
+			case tgbot_opt_int32: {
 				if (!options[i].value) {
 					break;
 				}
@@ -28,7 +28,7 @@ json_object *json_builder(tgbot_option_s *options, size_t optionslen) {
 				if (!options[i].value) {
 					break;
 				}
-				json_object_object_add(rjson, options[i].key, json_object_new_string((char *)options[i].value));
+				json_object_object_add(rjson, options[i].key, json_object_new_string(options[i].value));
 				break;
 			}
 			case tgbot_opt_int64: {

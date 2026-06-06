@@ -50,6 +50,11 @@ static int tgbot_request(const char *url, struct memory_buffer **mb, json_object
 
 	if (mb != NULL) {
 		*mb = calloc(1, sizeof(struct memory_buffer));
+		if (!mb) {
+			curl_slist_free_all(headers);
+			curl_easy_cleanup(curl);
+			return -1;
+		}
 		curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, (curl_write_callback)write_callback);
 		curl_easy_setopt(curl, CURLOPT_WRITEDATA, *mb);
 	} else {
@@ -159,8 +164,8 @@ int tgbot_get_update(tgbot_s *bot, tgbot_update_s *update, Callback cbq_handler)
 	int timeout = 30;
 	tgbot_option_s options[3] = {
 		{"offset", &bot->offset, tgbot_opt_int64},
-		{"limit", &limit, tgbot_opt_int},
-		{"timeout", &timeout, tgbot_opt_int},
+		{"limit", &limit, tgbot_opt_int32},
+		{"timeout", &timeout, tgbot_opt_int32},
 	};
 	json_object *rjson = json_builder(options, 3);
 
@@ -209,7 +214,7 @@ int tgbot_get_update(tgbot_s *bot, tgbot_update_s *update, Callback cbq_handler)
 	if (message) {
 		tgbot_parse_message(bot, update, result);
 	} else if (cbq_handler != NULL) {
-		tgbot_cbquery_s query;
+		tgbot_cbquery_s query = {0};
 		tgbot_parse_cbquery(bot, &query, result, cbq_handler);
 	}
 
@@ -287,7 +292,7 @@ int tgbot_edit_message_text(const tgbot_s *bot, tgbot_message *message) {
 
 	tgbot_option_s options[4] = {
 		{"chat_id", &message->chat_id, tgbot_opt_int64},
-		{"message_id", &message->message_id, tgbot_opt_int},
+		{"message_id", &message->message_id, tgbot_opt_int64},
 		{"text", (void *)message->text, tgbot_opt_string},
 		{"reply_markup", message->reply_markup, tgbot_opt_inlinekeyboard},
 	};

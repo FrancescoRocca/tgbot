@@ -17,6 +17,7 @@ tgbot_s *tgbot_new(const char *token) {
 		return NULL;
 	}
 
+	// TODO: this global init call should not be done by the library, even the cleanup
 	if (curl_global_init(CURL_GLOBAL_DEFAULT) != CURLE_OK) {
 		free(bot);
 		return NULL;
@@ -24,13 +25,6 @@ tgbot_s *tgbot_new(const char *token) {
 
 	int chars = snprintf(bot->api, sizeof(bot->api), "https://api.telegram.org/bot%s/", token);
 	if (chars < 0 || (size_t)chars >= sizeof(bot->api)) {
-		curl_global_cleanup();
-		free(bot);
-		return NULL;
-	}
-
-	chars = snprintf(bot->token, sizeof(bot->token), "%s", token);
-	if (chars < 0 || (size_t)chars >= sizeof(bot->token)) {
 		curl_global_cleanup();
 		free(bot);
 		return NULL;

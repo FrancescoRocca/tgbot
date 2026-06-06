@@ -11,8 +11,8 @@ int tgbot_parse_message(tgbot_s *bot, tgbot_update_s *update, json_object *resul
 		return -1;
 	}
 
-	bot->offset = json_object_get_int(update_id) + 1;
-	update->update_id = json_object_get_int(update_id);
+	bot->offset = json_object_get_int64(update_id) + 1;
+	update->update_id = json_object_get_int64(update_id);
 
 	json_object *message = json_object_object_get(result, "message");
 	if (!message) {
