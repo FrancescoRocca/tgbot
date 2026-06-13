@@ -1,8 +1,8 @@
 #ifndef TGBOT_INTERNAL_REQUEST_H
 #define TGBOT_INTERNAL_REQUEST_H
 
-#include <tgbot/types.h>
 #include <stddef.h>
+#include <tgbot/types.h>
 
 /**
  * @brief A structure used to accumulate curl response data.
