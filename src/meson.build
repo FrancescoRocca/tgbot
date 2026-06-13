@@ -1,13 +1,14 @@
 sources += files(
     'json.c',
     'methods.c',
-    'parse.c',
+    'parser.c',
+    'request.c',
     'tgbot.c',
     'types.c',
 )
 
 headers += files(
-    'internal/common.h',
     'internal/json.h',
-    'internal/parse.h',
+    'internal/parser.h',
+    'internal/request.h',
 )

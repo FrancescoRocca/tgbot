@@ -13,9 +13,9 @@ subdir('include')
 inc_dir = include_directories('include')
 
 curl_dep = dependency('libcurl')
-json_c_dep = dependency('json-c')
+yyjson_dep = dependency('yyjson')
 
-deps = [curl_dep, json_c_dep]
+deps = [curl_dep, yyjson_dep]
 
 install_headers(
     headers,

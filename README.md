@@ -5,7 +5,7 @@ A minimal C Telegram API library.
 ## Requirements
 
 - libcurl
-- json-c
+- yyjson
 
 > Note: This project is purely educational. It does not aim to cover the entire Telegram Bot API, but only a selected subset of methods.
 

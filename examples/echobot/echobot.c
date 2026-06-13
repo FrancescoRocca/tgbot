@@ -1,67 +1,65 @@
 #include <signal.h>
-#include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
 
 #include <tgbot/methods.h>
 #include <tgbot/tgbot.h>
 
-bool run = true;
+static volatile sig_atomic_t run = 1;
 
-void sighandler(int signum) {
+static void sighandler(int signum) {
 	(void)signum;
-	run = false;
+	run = 0;
 }
 
-void echo_message(tgbot_s *bot, tgbot_update_s *update) {
-	tgbot_message message = {
-		.chat_id = update->chat_id,
-		.text = update->text,
-		.parse_mode = "MARKDOWN",
-		.reply_markup = NULL,
-	};
-
-	tgbot_send_message(bot, &message);
+static void handle_message(tgbot_s *bot, tgbot_update_s *msg) {
+	if (strcmp(msg->text, "/start") == 0) {
+		tgbot_dice dice = {
+			.chat_id = msg->chat_id,
+			.emoji = NULL,
+		};
+		tgbot_send_dice(bot, &dice);
+	} else {
+		tgbot_message reply = {
+			.chat_id = msg->chat_id,
+			.text = msg->text,
+			.parse_mode = "MARKDOWN",
+			.reply_markup = NULL,
+		};
+		tgbot_send_message(bot, &reply);
+	}
 }
 
 int main(void) {
-	/* Retrieve bot's token */
 	FILE *fp = fopen(".token", "r");
-	if (fp == NULL) {
+	if (!fp) {
 		fprintf(stderr, "Unable to retrieve bot token\n");
 		return 1;
 	}
 
 	char token[256];
 	fscanf(fp, "%255s", token);
-	fprintf(stdout, "Token: %s\n", token);
 	fclose(fp);
 
 	signal(SIGINT, sighandler);
 
-	/* Initialize bot */
 	tgbot_s *bot = tgbot_new(token);
-	tgbot_update_s update;
+	tgbot_updates_t updates = {0};
 
 	while (run) {
-		if (tgbot_get_update(bot, &update, NULL) != 0) {
+		if (tgbot_get_updates(bot, &updates) != 0) {
 			continue;
 		}
-		if (strcmp(update.text, "/start") == 0) {
-			/* Send dice if /start otherwise echo the message */
-			tgbot_dice dice = {
-				.chat_id = update.chat_id,
-				.emoji = NULL,
-			};
 
-			tgbot_send_dice(bot, &dice);
-		} else {
-			echo_message(bot, &update);
+		for (size_t i = 0; i < updates.count; ++i) {
+			if (updates.items[i].type == MESSAGE) {
+				handle_message(bot, &updates.items[i].message);
+			}
 		}
+
+		tgbot_updates_free(&updates);
 	}
 
-	fprintf(stdout, "Closing...");
 	tgbot_free(bot);
-
 	return 0;
 }

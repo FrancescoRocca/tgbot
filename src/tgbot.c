@@ -1,10 +1,6 @@
-#include <stdbool.h>
-#include <stddef.h>
-#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "internal/common.h"
 #include <tgbot/tgbot.h>
 
 tgbot_s *tgbot_new(const char *token) {
@@ -17,15 +13,8 @@ tgbot_s *tgbot_new(const char *token) {
 		return NULL;
 	}
 
-	// TODO: this global init call should not be done by the library, even the cleanup
-	if (curl_global_init(CURL_GLOBAL_DEFAULT) != CURLE_OK) {
-		free(bot);
-		return NULL;
-	}
-
 	int chars = snprintf(bot->api, sizeof(bot->api), "https://api.telegram.org/bot%s/", token);
 	if (chars < 0 || (size_t)chars >= sizeof(bot->api)) {
-		curl_global_cleanup();
 		free(bot);
 		return NULL;
 	}
@@ -36,10 +25,7 @@ tgbot_s *tgbot_new(const char *token) {
 }
 
 void tgbot_free(tgbot_s *bot) {
-	if (!bot) {
-		return;
+	if (bot) {
+		free(bot);
 	}
-
-	curl_global_cleanup();
-	free(bot);
 }
