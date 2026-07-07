@@ -4,13 +4,20 @@
 #include <stdbool.h>
 #include <tgbot/types.h>
 
+#define KEY_SIZE 64
+
 /**
  * @brief Option type tag for json_builder().
  */
 enum tgbot_opt_type {
 	tgbot_opt_int32,
 	tgbot_opt_int64,
+	tgbot_opt_int64_ptr,
 	tgbot_opt_string,
+	tgbot_opt_bool,
+	tgbot_opt_bool_ptr,
+	tgbot_opt_double,
+	tgbot_opt_double_ptr,
 	tgbot_opt_inlinekeyboard,
 };
 typedef enum tgbot_opt_type tgbot_opt_type_e;
@@ -19,7 +26,7 @@ typedef enum tgbot_opt_type tgbot_opt_type_e;
  * @brief A key-value option passed to json_builder().
  */
 struct tgbot_option {
-	char key[32];
+	char key[KEY_SIZE];
 	void *value;
 	tgbot_opt_type_e type;
 };

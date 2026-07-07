@@ -16,7 +16,7 @@ static size_t discard_cb(char *ptr, size_t size, size_t nmemb, void *userdata) {
 	return size * nmemb;
 }
 
-static int execute_method(const tgbot_s *bot, const char *method, tgbot_option_s *options, size_t optlen) {
+int execute_method(const tgbot_s *bot, const char *method, tgbot_option_s *options, size_t optlen) {
 	char url[URL_LEN] = {0};
 	snprintf(url, sizeof(url), "%s%s", bot->api, method);
 

@@ -1,3 +1,4 @@
+#include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
 #include <yyjson.h>
@@ -82,9 +83,36 @@ char *json_builder(tgbot_option_s *options, size_t optionslen) {
 			case tgbot_opt_int64:
 				yyjson_mut_obj_add_sint(doc, root, options[i].key, *((int64_t *)options[i].value));
 				break;
+			case tgbot_opt_int64_ptr: {
+				int64_t *vp = (int64_t *)options[i].value;
+				if (vp) {
+					yyjson_mut_obj_add_sint(doc, root, options[i].key, *vp);
+				}
+				break;
+			}
 			case tgbot_opt_string:
 				yyjson_mut_obj_add_str(doc, root, options[i].key, (const char *)options[i].value);
 				break;
+			case tgbot_opt_bool:
+				yyjson_mut_obj_add_bool(doc, root, options[i].key, *((bool *)options[i].value));
+				break;
+			case tgbot_opt_bool_ptr: {
+				bool *vp = (bool *)options[i].value;
+				if (vp) {
+					yyjson_mut_obj_add_bool(doc, root, options[i].key, *vp);
+				}
+				break;
+			}
+			case tgbot_opt_double:
+				yyjson_mut_obj_add_real(doc, root, options[i].key, *((double *)options[i].value));
+				break;
+			case tgbot_opt_double_ptr: {
+				double *vp = (double *)options[i].value;
+				if (vp) {
+					yyjson_mut_obj_add_real(doc, root, options[i].key, *vp);
+				}
+				break;
+			}
 			case tgbot_opt_inlinekeyboard: {
 				yyjson_mut_val *rm = json_ikb_new(doc, (tgbot_inlinekeyboard_s *)options[i].value);
 				if (!rm) {
