@@ -30,23 +30,6 @@ tgbot_lib = static_library(
     install: true,
 )
 
-cppcheck = find_program('cppcheck', required: false)
-if cppcheck.found()
-    run_target(
-        'cppcheck',
-        command: [
-            cppcheck,
-            '--enable=all',
-            '--inconclusive',
-            '--std=c18',
-            '--check-level=exhaustive',
-            '--suppress=missingIncludeSystem',
-            '--project='
-            + join_paths(meson.current_build_dir(), 'compile_commands.json'),
-        ],
-    )
-endif
-
 clangformat = find_program('clang-format', required: false)
 if clangformat.found()
     run_target('format', command: [clangformat, '-i'] + sources + headers)
