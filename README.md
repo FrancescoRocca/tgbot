@@ -1,13 +1,13 @@
 # tgbot
 
-A minimal C Telegram API library.
+A C Telegram API library.
 
 ## Requirements
 
 - libcurl
 - yyjson
 
-> Note: This project is purely educational. It does not aim to cover the entire Telegram Bot API, but only a selected subset of methods.
+> Note: This project is purely educational.
 
 ## How to build
 
@@ -30,17 +30,3 @@ $ ninja <EXAMPLE>
 # to build the echobot:
 $ ninja echobot
 ```
-
-### Supported Types
-
-See [types.md](./docs/types.md).
-
-#### Supported Methods
-
-See [methods.md](./docs/methods.md).
-
-## Roadmap
-
-- `sendAudio`
-- `sendDocument`
-- `sendVideo`
